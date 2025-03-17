@@ -1,0 +1,19 @@
+{
+    "name": "El Pollo Loco",
+    "short_name": "El Pollo Loco",
+    "description": "Ein spannendes Jump-and-Run-Spiel mit Pepe und dem verrückten Huhn",
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "orientation": "landscape",
+    "icons": [
+      {
+        "src": "img/favicon/favicon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }
+  
+  
