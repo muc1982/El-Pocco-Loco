@@ -83,7 +83,6 @@ class StatusBar extends DrawableObject {
    */
   triggerZeroEffect() {
     if (window.showGameOver && this instanceof StatusBar && this.gameStarted) {
-      console.log("Health reached zero! Game Over!");
       window.showGameOver();
     }
   }
@@ -122,7 +121,7 @@ class BottleBar extends StatusBar {
     this.IMAGES = this.BOTTLE_IMAGES
     this.loadImages(this.IMAGES)
     this.y = 50
-    this.setPercentage(0, false) // false = keine Triggerung beim Start
+    this.setPercentage(0, false) 
   }
 }
 
@@ -139,7 +138,7 @@ class CoinBar extends StatusBar {
     this.IMAGES = this.COINS_IMAGES
     this.loadImages(this.IMAGES)
     this.y = 100
-    this.setPercentage(0, false) // false = keine Triggerung beim Start
+    this.setPercentage(0, false) 
   }
 }
 
@@ -159,7 +158,7 @@ class EndbossBar extends StatusBar {
     this.y = 0
     this.width = 200
     this.height = 60
-    this.setPercentage(100, false) // false = keine Triggerung beim Start
+    this.setPercentage(100, false) 
   }
   
   /**
@@ -168,7 +167,6 @@ class EndbossBar extends StatusBar {
   triggerZeroEffect() {
     // Endboss-spezifischer Effekt bei 0% Leben
     if (this.percentage === 0) {
-      console.log("Endboss defeated!");
     }
   }
 }

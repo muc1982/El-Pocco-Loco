@@ -1,8 +1,4 @@
 class GameStateManager {
-    /**
-     * Erstellt eine neue Instanz des GameStateManager.
-     * @param {World} world - Die Spielwelt.
-     */
     constructor(world) {
         this.world = world;
         this.victoryShown = false;
@@ -44,25 +40,11 @@ class GameStateManager {
             if (enemy instanceof Endboss) {
                 if (this.isCharacterNearEndboss(enemy)) {
                     this.activateEndboss(enemy);
-                    
-                    // Debugging-Informationen
-                    if (this.debugMode && !enemy.isAlerted) {
-                        console.log("Endboss wird aktiviert! Charakter ist nahe genug.");
-                    }
-                }
-                
-                // Debugging-Informationen für den Endboss-Status
-                if (this.debugMode && enemy.isAlerted && this.world._debugCounter % 180 === 0) {
-                    console.log("Endboss Status-Check:");
-                    console.log("- isAlerted:", enemy.isAlerted);
-                    console.log("- Charakter Position:", this.world.character.x);
-                    console.log("- Endboss Position:", enemy.x);
-                    console.log("- Distanz:", enemy.x - this.world.character.x);
                 }
             }
         });
     }
-
+                
     /**
      * Überprüft, ob der Charakter in der Nähe des Endbosses ist.
      * @param {Endboss} enemy - Der Endboss.
@@ -71,29 +53,6 @@ class GameStateManager {
     isCharacterNearEndboss(enemy) {
         // Distanz verringern, damit der Endboss früher aktiviert wird
         return this.world.character.x > enemy.x - 700;
-    }
-
-    /**
-     * Aktiviert den Endboss und zeigt seine Statusleiste an.
-     * @param {Endboss} enemy - Der zu aktivierende Endboss.
-     */
-    activateEndboss(enemy) {
-        this.world.endbossBarVisible = true;
-        enemy.isAlerted = true;
-        
-        // Sofortige Aktivierung des Angriffsmodus für den ersten Feuerball
-        if (this.debugMode && !enemy._attackedOnce) {
-            console.log("Erste Attacke des Endbosses wird vorbereitet!");
-            enemy._attackMode = true;
-            enemy._attackedOnce = true;
-            
-            // Feuerball direkt abfeuern, wenn wir in der Debug-Phase sind
-            setTimeout(() => {
-                if (enemy.checkFireballAttack) {
-                    enemy.checkFireballAttack();
-                }
-            }, 1000);
-        }
     }
 
     /**

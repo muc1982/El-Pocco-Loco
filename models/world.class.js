@@ -28,13 +28,10 @@ class World {
     this.keyboard = keyboard
     this.level = level
     this.character.world = this
-
-    // Manager initialisieren
     this.collisionManager = new CollisionManager(this)
     this.renderer = new WorldRenderer(this)
     this.gameStateManager = new GameStateManager(this)
     this.itemManager = new ItemManager(this)
-
     this.setWorld()
     this.lastFrameTime = performance.now()
     this.renderer.draw()

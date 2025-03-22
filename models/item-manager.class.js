@@ -1,8 +1,4 @@
 class ItemManager {
-    /**
-     * Erstellt eine neue Instanz des ItemManager.
-     * @param {World} world - Die Spielwelt.
-     */
     constructor(world) {
         this.world = world;
         this.bottleThrowCooldown = false;
@@ -37,10 +33,10 @@ class ItemManager {
      */
     canThrowBottle(currentTime) {
         const cooldownElapsed = currentTime - this.lastBottleThrow > this.bottleCooldownTime;
-        return this.world.keyboard.D && 
-               this.world.collectedBottles > 0 && 
-               !this.bottleThrowCooldown &&
-               cooldownElapsed;
+        return this.world.keyboard.D &&
+            this.world.collectedBottles > 0 &&
+            !this.bottleThrowCooldown &&
+            cooldownElapsed;
     }
 
     /**
