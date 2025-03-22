@@ -9,6 +9,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background-image: url("img/main background/mainbackround.png");
   background-size: cover;
   background-position: center;
@@ -24,27 +25,58 @@ h1 {
   margin: 20px 0;
   color: #fff;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  width: 100%;
 }
 
+/* Zentriere den gesamten Inhalt */
 #content {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  max-width: 720px;
-  position: relative;
-  z-index: 10;
-  padding-bottom: 480px;
+  max-width: 100%;
+  height: 100vh;
+  margin: 0 auto;
+  padding: 0;
 }
 
-#start-screen {
-  position: relative;
-  width: 100%;
-  max-width: 720px;
+/* Positioniere Start-Screen und Game-Container zentral */
+#start-screen,
+#game-container,
+#game-over,
+#game-won {
+  position: absolute;
+  width: 720px;
   height: 480px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#start-screen {
+  z-index: 19;
+  display: flex;
+}
+
+#game-container {
+  z-index: 20;
+  display: none;
+}
+
+#game-over,
+#game-won {
+  z-index: 21;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
 }
 
 #start-screen img {
@@ -107,28 +139,17 @@ h1 {
   background-color: #ffaa33;
 }
 
-#game-container {
-  position: absolute;
-  top: 88px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 720px;
-  height: 480px;
-  margin: 0 auto;
-  z-index: 20;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
+/* Stelle sicher, dass Canvas immer sichtbar ist */
+/* Stelle sicher, dass Canvas die volle Größe des Containers einnimmt */
 canvas {
   background-color: black;
   display: block;
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
-  image-rendering: crisp_edges;
+  image-rendering: crisp-edges;
+  visibility: visible !important; /* Erzwinge Sichtbarkeit */
+  z-index: 25; /* Höherer z-index als andere Elemente */
 }
 
 #overlay-buttons {
@@ -159,10 +180,13 @@ canvas {
 }
 
 #mobile-buttons {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  padding: 0 20px;
   z-index: 30;
 }
 
@@ -194,13 +218,11 @@ canvas {
 #game-over,
 #game-won {
   position: absolute;
-  top: 88px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 720px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 720px;
   height: 480px;
-  margin: 0 auto;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -228,9 +250,10 @@ canvas {
 
 /* Verbesserte Darstellung des Footers */
 #footer {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  position: relative;
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
   z-index: 100;
   width: 100%;
   text-align: center;
@@ -247,12 +270,15 @@ canvas {
   text-decoration: underline;
 }
 
+/* Stelle sicher, dass die d-none Klasse wirklich Elemente versteckt */
 .d-none {
   display: none !important;
+  visibility: hidden !important;
 }
 
 .d-flex {
   display: flex !important;
+  visibility: visible !important;
 }
 
 #rotate-device {
@@ -363,7 +389,7 @@ canvas {
 #start-screen,
 #game-over,
 #game-won {
-  transform: translateZ(0);
+  transform: translate(-50%, -50%);
   backface-visibility: hidden;
   perspective: 1000px;
 }
@@ -400,8 +426,29 @@ canvas {
   }
 }
 
-/* Responsive */
+/* Verbesserte Darstellung für mobile Geräte */
 @media only screen and (max-width: 768px) {
+  #content {
+    width: 100%;
+    height: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #game-container,
+  #start-screen {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
   html,
   body {
     width: 100%;
@@ -415,33 +462,7 @@ canvas {
   }
 
   /* Zentriert den Inhalt vertikal und horizontal */
-  #content {
-    width: 100%;
-    height: 100%;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* Anpassung des Game-Containers */
-  #game-container,
-  #start-screen,
-  #game-over,
-  #game-won {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    margin: 0;
-    border-radius: 0; /* Entfernt abgerundete Ecken auf Mobilgeräten */
-    box-shadow: none;
-  }
-
+  /* Anpassung für mobile Geräte */
   /* Canvas auf Bildschirmgröße anpassen */
   canvas {
     width: 100%;
@@ -553,8 +574,9 @@ canvas {
     border-radius: 0;
     box-shadow: none;
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   #start-screen img {
@@ -566,8 +588,9 @@ canvas {
   /* Spielcontainer im Vollbildmodus */
   #game-container {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
     max-width: 100%;
@@ -588,8 +611,9 @@ canvas {
   #game-over,
   #game-won {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
     max-width: 100%;
@@ -742,19 +766,32 @@ canvas {
   }
 
   #content {
-    padding-bottom: 20px;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h1 {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
   }
 
   #game-container,
   #start-screen,
   #game-over,
   #game-won {
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 720px;
     height: 480px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    margin: 0 auto;
   }
 }
 
@@ -779,8 +816,9 @@ canvas {
   width: 100%;
   height: 100%;
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   margin: 0;
   padding: 0;
   border-radius: 0;
@@ -850,6 +888,10 @@ body.impressum-page {
   padding: 5px;
   margin: 0;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .impressum-link:hover {
@@ -872,6 +914,7 @@ body.impressum-page {
     padding: 5px 10px;
     background: none;
     border-radius: 0;
+    bottom: 5px;
   }
 }
 

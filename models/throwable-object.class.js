@@ -1,4 +1,5 @@
 class ThrowableObject extends MoveableObject {
+  
   IMAGES_ROTATION = [
     "img/salsa_bottle/bottle_rotation/1_bottle_rotation.png",
     "img/salsa_bottle/bottle_rotation/2_bottle_rotation.png",
@@ -25,27 +26,35 @@ class ThrowableObject extends MoveableObject {
   splashTimeout = null
   canBeCollected = false
   currentSplashImage = 0
+  world = null
 
+  /**
+   * Erstellt ein neues werfbares Objekt.
+   * @param {number} x - X-Koordinate
+   * @param {number} y - Y-Koordinate
+   * @param {boolean} otherDirection - Wurfrichtung
+   */
   constructor(x, y, otherDirection) {
     super()
     this.loadImage("img/salsa_bottle/bottle_rotation/1_bottle_rotation.png")
     this.loadImages(this.IMAGES_ROTATION)
     this.loadImages(this.IMAGES_SPLASH)
 
-    // Etwas tiefer + offset
     this.x = x
     this.y = y
-
     this.height = 80
     this.width = 80
-
     this.throw(otherDirection)
   }
 
+  /**
+   * Wirft das Objekt.
+   * @param {boolean} otherDirection - Wurfrichtung
+   */
   throw(otherDirection) {
-    this.speedY = 15 // Etwas weniger Höhe
-    this.acceleration = 1 // Schnelleres Fallen
-    this.speedX = otherDirection ? -8 : 8 // Schnellere horizontale Bewegung
+    this.speedY = 15
+    this.acceleration = 1
+    this.speedX = otherDirection ? -8 : 8
     this.groundY = 350
     this.applyGravity()
     this.animationInterval = setInterval(() => {
@@ -62,6 +71,9 @@ class ThrowableObject extends MoveableObject {
     }, 50)
   }
 
+  /**
+   * Wendet die Schwerkraft auf das Objekt an.
+   */
   applyGravity() {
     setInterval(() => {
       if (this.isAboveGround() || this.speedY > 0) {
@@ -75,16 +87,26 @@ class ThrowableObject extends MoveableObject {
     }, 1000 / 25)
   }
 
+  /**
+   * Prüft, ob sich das Objekt über dem Boden befindet.
+   * @returns {boolean} - Wenn über dem Boden
+   */
   isAboveGround() {
     return this.y < this.groundY
   }
 
+  /**
+   * Prüft, ob die Flasche den Boden berührt hat.
+   */
   checkGroundContact() {
     if (this.y >= this.groundY && !this.isSplashed && !this.hasHitGround) {
       this.splash()
     }
   }
 
+  /**
+   * Führt die Splash-Animation aus, wenn die Flasche zerbricht.
+   */
   splash() {
     this.hasHitGround = true
     this.isSplashed = true
@@ -98,19 +120,63 @@ class ThrowableObject extends MoveableObject {
     this.canBeCollected = true
   }
 
+  /**
+   * Startet die Splash-Animation.
+   * Animiert das Zerbrechen der Flasche und entfernt sie nach Abschluss.
+   */
   startSplashAnimation() {
+    this.resetSplashAnimation()
+    this.runSplashAnimationSequence()
+  }
+
+  /**
+   * Setzt den Zustand der Splash-Animation zurück.
+   */
+  resetSplashAnimation() {
     this.currentSplashImage = 0
+    if (this.splashAnimationInterval) {
+      clearInterval(this.splashAnimationInterval)
+    }
+  }
+
+  /**
+   * Führt die Splash-Animationssequenz aus und kümmert sich um die Bereinigung.
+   */
+  runSplashAnimationSequence() {
     this.splashAnimationInterval = setInterval(() => {
-      if (this.currentSplashImage < this.IMAGES_SPLASH.length) {
-        this.img = this.imageCache[this.IMAGES_SPLASH[this.currentSplashImage]]
-        this.currentSplashImage++
-      } else {
-        clearInterval(this.splashAnimationInterval)
-        this.splashAnimationInterval = null
-      }
+      this.updateSplashFrame()
     }, 100)
   }
 
+  /**
+   * Aktualisiert das aktuelle Splash-Animationsframe.
+   */
+  updateSplashFrame() {
+    if (this.currentSplashImage < this.IMAGES_SPLASH.length) {
+      this.img = this.imageCache[this.IMAGES_SPLASH[this.currentSplashImage]]
+      this.currentSplashImage++
+    } else {
+      this.finishSplashAnimation()
+    }
+  }
+
+  /**
+   * Beendet die Splash-Animation und plant die Entfernung.
+   */
+  finishSplashAnimation() {
+    clearInterval(this.splashAnimationInterval)
+    this.splashAnimationInterval = null
+    
+    // Splash-Animation nach Abschluss entfernen
+    this.splashTimeout = setTimeout(() => {
+      this.destroy()
+    }, 500)
+  }
+
+  /**
+   * Zeichnet das Objekt auf dem Canvas.
+   * @param {CanvasRenderingContext2D} ctx - Canvas-Kontext
+   */
   draw(ctx) {
     if (this.isSplashed) {
       super.draw(ctx)
@@ -123,7 +189,24 @@ class ThrowableObject extends MoveableObject {
     }
   }
 
+  /**
+   * Zerstört dieses werfbare Objekt und bereinigt Ressourcen.
+   */
   destroy() {
+    this.clearAllIntervals()
+    // Aus der Welt entfernen, wenn möglich
+    if (this.world && this.world.throwableObjects) {
+      const index = this.world.throwableObjects.indexOf(this)
+      if (index !== -1) {
+        this.world.throwableObjects.splice(index, 1)
+      }
+    }
+  }
+
+  /**
+   * Löscht alle Intervalle und Timeouts.
+   */
+  clearAllIntervals() {
     if (this.animationInterval) {
       clearInterval(this.animationInterval)
       this.animationInterval = null
@@ -142,4 +225,3 @@ class ThrowableObject extends MoveableObject {
     }
   }
 }
-

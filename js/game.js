@@ -6,7 +6,8 @@ const keyboard = new Keyboard(),
 levels = []
 window.gameRunning = false
 let isRestarting = false
-let gameOverShown = false // Flag, um mehrfaches Auslösen der Game-Over-Logik zu verhindern
+let gameOverShown = false 
+
 
 function init() {
   initLevels()
@@ -25,12 +26,23 @@ function init() {
   window.gameRunning = false
   isRestarting = false
   gameOverShown = false
+
+  // Canvas-Element sichtbar machen und Größe setzen
+  const canvasElement = document.getElementById("canvas")
+  if (canvasElement) {
+    canvasElement.style.display = "block"
+    canvasElement.style.visibility = "visible"
+    canvasElement.width = 720
+    canvasElement.height = 480
+  }
+
   requestAnimationFrame(gameLoop)
 }
 window.init = init
 
 /**
  * Hauptspiel-Loop, der regelmäßig die Welt aktualisiert.
+ * Wird pro Frame aufgerufen.
  */
 function gameLoop() {
   if (window.gameRunning && world && typeof world.update === "function") {
@@ -41,6 +53,7 @@ function gameLoop() {
 
 /**
  * Fügt Touch-Event-Listener für die mobilen Steuerknöpfe hinzu.
+ * Ermöglicht die Steuerung auf Touchscreens.
  */
 function addTouchListeners() {
   setupTouchButton("btn-left", "LEFT")
@@ -77,6 +90,7 @@ function setupTouchButton(id, key) {
 
 /**
  * Lädt alle Level in das levels-Array.
+ * Initialisiert die Level-Daten aus den externen Level-Dateien.
  */
 function initLevels() {
   if (typeof window.initLevel1 === "function") levels[1] = window.initLevel1()
@@ -86,14 +100,45 @@ function initLevels() {
 
 /**
  * Startet das Spiel und initialisiert die Spielwelt.
+ * Zeigt den Ladescreen und bereitet das Spielfeld vor.
  */
 function startGame() {
   toggleLoader(true)
   setTimeout(() => {
     toggleLoader(false)
     if (window.gameRunning) return
-    toggleStartScreen(false)
+
+    // Startscreen komplett ausblenden
+    const startScreen = document.getElementById("start-screen")
+    if (startScreen) {
+      startScreen.style.display = "none"
+      startScreen.style.visibility = "hidden"
+    }
+
+    // Game Container an der gleichen Position anzeigen
+    const gameContainer = document.getElementById("game-container")
+    if (gameContainer) {
+      gameContainer.style.display = "block"
+      gameContainer.style.visibility = "visible"
+      gameContainer.classList.remove("d-none")
+    }
+
+    // Canvas sichtbar machen
     canvas = document.getElementById("canvas")
+    if (canvas) {
+      canvas.style.display = "block"
+      canvas.style.visibility = "visible"
+      canvas.width = 720
+      canvas.height = 480
+    }
+
+    // Mobile Buttons anzeigen wenn nötig
+    const mobileButtons = document.getElementById("mobile-buttons")
+    if (mobileButtons && window.innerWidth < 1024) {
+      mobileButtons.style.display = "flex"
+      mobileButtons.classList.remove("d-none")
+    }
+
     initGameWorld()
     window.gameRunning = true
 
@@ -102,7 +147,7 @@ function startGame() {
     }
 
     window.scrollTo(0, 0)
-    canvas.focus()
+    if (canvas) canvas.focus()
     window.playSnoreSound()
   }, 1000)
 }
@@ -122,13 +167,47 @@ function toggleLoader(show) {
  * @param {boolean} show - true, um den Startbildschirm anzuzeigen.
  */
 function toggleStartScreen(show) {
-  document.getElementById("start-screen").classList.toggle("d-none", !show)
-  document.getElementById("game-container").classList.toggle("d-none", show)
-  document.getElementById("mobile-buttons").classList.toggle("d-none", show)
+  const startScreen = document.getElementById("start-screen")
+  const gameContainer = document.getElementById("game-container")
+  const mobileButtons = document.getElementById("mobile-buttons")
+
+  if (startScreen) {
+    startScreen.style.display = show ? "flex" : "none"
+    if (show) {
+      startScreen.classList.remove("d-none")
+    } else {
+      startScreen.classList.add("d-none")
+    }
+  }
+
+  if (gameContainer) {
+    gameContainer.style.display = show ? "none" : "block"
+    if (show) {
+      gameContainer.classList.add("d-none")
+    } else {
+      gameContainer.classList.remove("d-none")
+    }
+  }
+
+  if (mobileButtons) {
+    mobileButtons.style.display = show || window.innerWidth >= 1024 ? "none" : "flex"
+    if (show || window.innerWidth >= 1024) {
+      mobileButtons.classList.add("d-none")
+    } else {
+      mobileButtons.classList.remove("d-none")
+    }
+  }
+
+  // Impressum während des Spiels ausblenden
+  const impressumBtn = document.getElementById("impressum-btn")
+  if (impressumBtn) {
+    impressumBtn.style.display = show ? "block" : "none"
+  }
 }
 
 /**
  * Initialisiert die Spielwelt mit dem aktuellen Level.
+ * Erstellt eine neue World-Instanz.
  */
 function initGameWorld() {
   if (!levels[currentLevel]) initLevels()
@@ -138,12 +217,24 @@ function initGameWorld() {
 
 /**
  * Zeigt den Game-Over-Bildschirm an.
+ * Stoppt die Spiellogik und spielt den Game-Over-Sound ab.
  */
 function showGameOver() {
   if (gameOverShown) return
   gameOverShown = true
+  
+  // Alle Sounds stoppen
+  if (typeof window.stopAllSounds === "function") window.stopAllSounds()
+  
   toggleGameScreens(true)
   window.gameRunning = false
+  
+  // Welt stoppen und aufräumen
+  if (world && typeof world.stop === "function") {
+    world.stop()
+    world.isGameOver = true
+  }
+  
   if (typeof window.playGameOverSound === "function") window.playGameOverSound()
 }
 window.showGameOver = showGameOver
@@ -160,6 +251,7 @@ function toggleGameScreens(isGameOver) {
 
 /**
  * Setzt das Spiel zurück und startet es neu.
+ * Bereinigt den alten Spielzustand und initialisiert einen neuen.
  */
 function restartGame() {
   if (isRestarting) return
@@ -167,27 +259,42 @@ function restartGame() {
 
   window.stopAllSounds()
 
+  // Bereinigen des alten Zustands
   if (world && typeof world.stop === "function") {
     world.stop()
   }
 
+  // Entfernen aller Overlays
   document.getElementById("victory-overlay")?.remove()
   const gameOverOverlay = document.getElementById("game-over")
   if (gameOverOverlay) gameOverOverlay.classList.add("d-none")
+  const gameWonOverlay = document.getElementById("game-won")
+  if (gameWonOverlay) gameWonOverlay.classList.add("d-none")
 
+  // Game-Container anzeigen und Mobile-Buttons aktualisieren
   toggleStartScreen(false)
 
+  // Spiel auf Level 1 zurücksetzen
   currentLevel = 1
   gameOverShown = false
 
+  // Neu initialisieren
   initLevels()
   canvas = document.getElementById("canvas")
   if (canvas && levels[1]) {
     world = new World(canvas, keyboard, levels[1])
     world.currentLevel = 1
     world.character.energy = 100
+    
+    // Den Charakter auf die Startposition zurücksetzen
+    if (world.character) {
+      world.character.x = 120 // Startposition X
+      world.character.y = 180 // Startposition Y
+      world.camera_x = 0      // Kamera zurücksetzen
+    }
+    
     window.gameRunning = true
-    canvas.focus()
+    if (canvas) canvas.focus()
   }
 
   setTimeout(() => {
@@ -206,7 +313,7 @@ function createVictoryOverlay(level) {
   const ov = document.createElement("div")
   ov.id = "victory-overlay"
   ov.style =
-    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;"
+    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;"
 
   const img = document.createElement("img")
   img.src = "img/intro_outro_screens/win/won_2.png"
@@ -216,7 +323,7 @@ function createVictoryOverlay(level) {
   const textContainer = document.createElement("div")
   textContainer.style =
     "position:relative; bottom:0; width:720px; text-align:center; color:#fff; font-family:'Luckiest Guy', cursive; font-size:32px; z-index:2; margin-top:10px;"
-  textContainer.innerText = level < 3 ? `Du hast Level ${level + 1} erreicht!` : "Du hast das Spiel gewonnen!"
+  textContainer.innerText = level < 3 ? `Du hast Level ${level} abgeschlossen!` : "Du hast das Spiel gewonnen!"
   ov.appendChild(textContainer)
 
   return ov
@@ -228,6 +335,7 @@ function createVictoryOverlay(level) {
  */
 function showVictoryScreen(level) {
   const ov = createVictoryOverlay(level)
+  document.body.appendChild(ov)
 
   window.stopAllSounds()
   window.stopSnoreSound()
@@ -236,6 +344,14 @@ function showVictoryScreen(level) {
     window.playGameWinSound()
   }
 
+  // Spiel stoppen
+  window.gameRunning = false
+  
+  if (world && typeof world.stop === "function") {
+    world.stop()
+    world.isGameOver = true
+  }
+  
   if (level < 3) {
     handleLevelCompletion(ov, level)
   } else {
@@ -281,9 +397,11 @@ function handleGameCompletion(ov) {
  * @param {number} level - Das nächste Level.
  */
 function nextLevel(level) {
-  if (level > 3) return showVictoryScreen()
+  if (level > 3) return showVictoryScreen(3)
+  
   currentLevel = level
   window.stopAllSounds()
+  
   setTimeout(() => {
     canvas = document.getElementById("canvas")
     if (!levels[currentLevel]) initLevels()
@@ -460,4 +578,3 @@ function checkIfImpressumPage() {
 }
 
 window.addEventListener("DOMContentLoaded", checkIfImpressumPage)
-

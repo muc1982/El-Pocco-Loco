@@ -1,14 +1,14 @@
 class Endboss extends MoveableObject {
-  width = 350
-  height = 250
-  y = 185
+  width = 650   
+  height = 325
+  y = 120
   groundY = 30
   energy = 100
   isAlerted = false
   world
   baseSpeed = 0.25
-  fallStarted = false // Neuer Zustand, um den Fall zu starten
-  deathProcessed = false // Damit der Sieg nur einmal ausgelöst wird
+  fallStarted = false 
+  deathProcessed = false 
 
   offset = {
     top: 40,
@@ -67,12 +67,12 @@ class Endboss extends MoveableObject {
     this.loadImages(this.IMAGES_HURT)
     this.loadImages(this.IMAGES_DEAD)
     this.x = 2500
-    // Für den Endboss: Erhöhe den Multiplikator, z. B. 1 + (level-1)*1.2
-    this.speed = this.baseSpeed * (1 + (level - 1) * 1.2)
+    // Erhöhe die Geschwindigkeit und Stärke des Endbosses
+    this.speed = this.baseSpeed * (1 + (level - 1) * 1.5) // Erhöhter Multiplikator
+    this.energy = 100 // Standard-Energie
     this.animate()
   }
 
-  // In endboss.class.js:
   animateMovement() {
     setInterval(() => {
       if (!this.isDead() && this.isAlerted) {
@@ -118,3 +118,5 @@ class Endboss extends MoveableObject {
   }
 }
 
+// Korrekte Export der Klasse
+window.Endboss = Endboss; // Stellt sicher, dass die Klasse global verfügbar ist
