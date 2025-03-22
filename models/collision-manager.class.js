@@ -1,24 +1,23 @@
 class CollisionManager {
   /**
-   * Erstellt eine neue Instanz des CollisionManager.
-   * @param {World} world - Die Spielwelt, in der Kollisionen geprüft werden.
+   * Creates a new CollisionManager.
+   * @param {World} world - The game world.
    */
   constructor(world) {
     this.world = world
   }
 
   /**
-   * Prüft alle Kollisionen im Spiel.
-   * Führt Prüfungen für Gegner und Sammelobjekte durch.
+   * Checks all collisions in the game.
    */
   checkCollisions() {
     this.checkEnemyCollisions()
     this.checkCollectibles()
+    this.checkFireballCharacterCollisions()
   }
 
   /**
-   * Prüft Kollisionen mit Gegnern.
-   * Überprüft sowohl Charakter-Gegner als auch Flasche-Gegner Kollisionen.
+   * Checks collisions with enemies.
    */
   checkEnemyCollisions() {
     this.world.level.enemies.forEach((enemy) => {
@@ -28,24 +27,61 @@ class CollisionManager {
   }
 
   /**
-   * Prüft Kollisionen zwischen Charakter und Gegner.
-   * Unterscheidet zwischen Kopfkollisionen und normalen Kollisionen.
-   * @param {MoveableObject} enemy - Der zu prüfende Gegner.
+   * Checks collision between character and enemy.
+   * @param {MoveableObject} enemy - The enemy.
    */
   checkCharacterEnemyCollision(enemy) {
     if (this.world.character.isCollidingWithHead(enemy)) {
       this.handleHeadCollision(enemy)
       return
     }
+
     if (this.world.character.isColliding(enemy) && !enemy.isDead()) {
       this.handleCharacterCollision(enemy)
     }
   }
 
   /**
-   * Behandelt Kollisionen zwischen Charakter und Gegner.
-   * Reduziert die Energie des Charakters und spielt den Verletzungssound ab.
-   * @param {MoveableObject} enemy - Der kollidierte Gegner.
+   * Checks for collisions between fireballs and the character.
+   * Diese neue Methode prüft explizit auf Kollisionen zwischen Feuerbällen und dem Charakter
+   */
+  checkFireballCharacterCollisions() {
+    if (!this.world.character || this.world.character.isDead()) return
+
+    this.world.throwableObjects.forEach((obj) => {
+      if (obj instanceof Fireball && this.isFireballHittingCharacter(obj, this.world.character)) {
+        this.handleCharacterFireballHit(this.world.character, obj)
+      }
+    })
+  }
+
+  /**
+   * Checks if a fireball is hitting the character.
+   * @param {Fireball} fireball - The fireball.
+   * @param {Character} character - The character.
+   * @returns {boolean} True if the fireball is hitting the character.
+   */
+  isFireballHittingCharacter(fireball, character) {
+    const fireballLeft = fireball.x
+    const fireballRight = fireball.x + fireball.width
+    const fireballTop = fireball.y
+    const fireballBottom = fireball.y + fireball.height
+    const characterLeft = character.x + character.offset.left
+    const characterRight = character.x + character.width - character.offset.right
+    const characterTop = character.y + character.offset.top
+    const characterBottom = character.y + character.height - character.offset.bottom
+   
+    return (
+      fireballRight > characterLeft &&
+      fireballLeft < characterRight &&
+      fireballBottom > characterTop &&
+      fireballTop < characterBottom
+    )
+  }
+
+  /**
+   * Handles collision between character and enemy.
+   * @param {MoveableObject} enemy - The enemy.
    */
   handleCharacterCollision(enemy) {
     if (!this.world.character.isHurt() && !this.world.character.isDead()) {
@@ -56,28 +92,45 @@ class CollisionManager {
   }
 
   /**
-   * Behandelt Kopfkollisionen mit Gegnern.
-   * Tötet den Gegner, wenn es sich um ein Huhn handelt.
-   * @param {MoveableObject} enemy - Der getroffene Gegner.
+   * Handles head collision with enemy.
+   * @param {MoveableObject} enemy - The enemy.
    */
   handleHeadCollision(enemy) {
-    if ((enemy instanceof Chicken || enemy instanceof SmallChicken) && !enemy.isDead()) {
-      enemy.energy = 0
-      window.playChickenSound()
-      this.world.character.bounce()
-      setTimeout(() => {
-        this.world.level.enemies = this.world.level.enemies.filter((e) => e !== enemy)
-      }, 1000)
+    if (this.isChickenEnemy(enemy) && !enemy.isDead()) {
+      this.killChickenEnemy(enemy)
     }
   }
 
   /**
-   * Prüft Kollisionen zwischen Flaschen und Gegnern.
-   * @param {MoveableObject} enemy - Der zu prüfende Gegner.
+   * Checks if enemy is a chicken type.
+   * @param {MoveableObject} enemy - The enemy.
+   * @returns {boolean} True if chicken type.
+   */
+  isChickenEnemy(enemy) {
+    return enemy instanceof Chicken || enemy instanceof SmallChicken
+  }
+
+  /**
+   * Kills a chicken enemy.
+   * @param {MoveableObject} enemy - The enemy.
+   */
+  killChickenEnemy(enemy) {
+    enemy.energy = 0
+    window.playChickenSound()
+    this.world.character.bounce()
+
+    setTimeout(() => {
+      this.world.level.enemies = this.world.level.enemies.filter((e) => e !== enemy)
+    }, 1000)
+  }
+
+  /**
+   * Checks collisions between bottles and enemies.
+   * @param {MoveableObject} enemy - The enemy.
    */
   checkBottleEnemyCollision(enemy) {
     this.world.throwableObjects.forEach((bottle) => {
-      if (bottle.isColliding(enemy) && !enemy.isDead() && !bottle.isSplashed) {
+      if (this.canBottleHitEnemy(bottle, enemy)) {
         if (enemy instanceof Endboss) {
           this.checkEndbossBottleCollision(enemy, bottle)
         } else {
@@ -88,47 +141,101 @@ class CollisionManager {
   }
 
   /**
-   * Prüft Kollisionen zwischen Flaschen und dem Endboss.
-   * Berücksichtigt die spezielle Hitbox des Endbosses.
-   * @param {Endboss} enemy - Der Endboss.
-   * @param {ThrowableObject} bottle - Die geworfene Flasche.
+   * Checks if bottle can hit enemy.
+   * @param {ThrowableObject} bottle - The bottle.
+   * @param {MoveableObject} enemy - The enemy.
+   * @returns {boolean} True if can hit.
+   */
+  canBottleHitEnemy(bottle, enemy) {
+    return bottle instanceof ThrowableObject && bottle.isColliding(enemy) && !enemy.isDead() && !bottle.isSplashed
+  }
+
+  /**
+   * Checks collision between a bottle and the Endboss.
+   * @param {Endboss} enemy - The Endboss.
+   * @param {ThrowableObject} bottle - The bottle.
    */
   checkEndbossBottleCollision(enemy, bottle) {
-    const bossTop = enemy.y + enemy.offset.top
-    const bossBottom = enemy.y + enemy.height - enemy.offset.bottom
-    if (bottle.y >= bossTop && bottle.y <= bossBottom) {
+    const bossTop = enemy.y + enemy.offset.top + 50
+    const bossBottom = enemy.y + enemy.height - enemy.offset.bottom - 30
+    const bossLeft = enemy.x + enemy.offset.left + 100 
+    const bossRight = enemy.x + enemy.width - enemy.offset.right - 50
+
+    const bottleTop = bottle.y
+    const bottleBottom = bottle.y + bottle.height
+    const bottleLeft = bottle.x
+    const bottleRight = bottle.x + bottle.width
+
+    if (bottleRight > bossLeft && bottleLeft < bossRight && bottleBottom > bossTop && bottleTop < bossBottom) {
       this.handleBottleHit(enemy, bottle)
     }
   }
 
   /**
-   * Behandelt Treffer mit Flaschen.
-   * Unterscheidet zwischen Endboss und normalen Gegnern.
-   * @param {MoveableObject} enemy - Der getroffene Gegner.
-   * @param {ThrowableObject} bottle - Die Flasche, die getroffen hat.
+   * Handles bottle hit.
+   * @param {MoveableObject} enemy - The enemy.
+   * @param {ThrowableObject} bottle - The bottle.
    */
   handleBottleHit(enemy, bottle) {
     if (enemy instanceof Endboss) {
-      enemy.hitCount = (enemy.hitCount || 0) + 1
-      // Erhöhter Schaden pro Treffer (33% statt 20%)
-      enemy.energy = enemy.hitCount >= 3 ? 0 : 100 - 33.33 * enemy.hitCount // Weniger Treffer nötig (3 statt 5)
-      this.world.endbossBar.setPercentage(enemy.energy)
-      if (typeof window.playEndbossHurtSound === "function") {
-        window.playEndbossHurtSound()
-      }
+      this.handleEndbossHit(enemy)
     } else {
-      enemy.energy = 0
-      window.playChickenSound()
-      setTimeout(() => {
-        this.world.level.enemies = this.world.level.enemies.filter((e) => e !== enemy)
-      }, 1000)
+      this.handleRegularEnemyHit(enemy)
     }
-    bottle.splash()
+
+    if (typeof bottle.splash === "function") {
+      bottle.splash()
+    }
   }
 
   /**
-   * Prüft Kollisionen mit einsammelbaren Objekten.
-   * Überprüft Flaschen, Münzen und auf dem Boden liegende Flaschen.
+   * Handles a fireball hit on the character.
+   * @param {Character} character - The character.
+   * @param {Fireball} fireball - The fireball.
+   */
+  handleCharacterFireballHit(character, fireball) {
+    if (!character.isHurt() && !character.isDead()) {
+      character.hit(10)
+      this.world.statusBar.setPercentage(character.energy)
+      window.playHurtSound()
+      this.world.throwableObjects = this.world.throwableObjects.filter((obj) => obj !== fireball)
+      if (typeof fireball.splash === "function") {
+        fireball.splash()
+      } else {
+        fireball.destroy()
+      }
+    }
+  }
+
+  /**
+   * Handles hit on Endboss.
+   * @param {Endboss} enemy - The Endboss.
+   */
+  handleEndbossHit(enemy) {
+    enemy.hitCount = (enemy.hitCount || 0) + 1
+    enemy.energy = enemy.hitCount >= 3 ? 0 : 100 - 33.33 * enemy.hitCount
+    this.world.endbossBar.setPercentage(enemy.energy)
+
+    if (typeof window.playEndbossHurtSound === "function") {
+      window.playEndbossHurtSound()
+    }
+  }
+
+  /**
+   * Handles hit on regular enemy.
+   * @param {MoveableObject} enemy - The enemy.
+   */
+  handleRegularEnemyHit(enemy) {
+    enemy.energy = 0
+    window.playChickenSound()
+
+    setTimeout(() => {
+      this.world.level.enemies = this.world.level.enemies.filter((e) => e !== enemy)
+    }, 1000)
+  }
+
+  /**
+   * Checks collisions with collectibles.
    */
   checkCollectibles() {
     this.checkBottleCollisions()
@@ -137,8 +244,7 @@ class CollisionManager {
   }
 
   /**
-   * Prüft auf Kollisionen mit auf dem Boden liegenden Flaschen.
-   * Ermöglicht das Einsammeln von Flaschen nach dem Aufprall.
+   * Checks for splashed bottle collisions.
    */
   checkSplashedBottles() {
     this.world.throwableObjects.forEach((bottle) => {
@@ -149,9 +255,8 @@ class CollisionManager {
   }
 
   /**
-   * Sammelt eine auf dem Boden liegende Flasche ein.
-   * Aktualisiert den Flaschenvorrat und entfernt die Flasche aus der Welt.
-   * @param {ThrowableObject} bottle - Die einzusammelnde Flasche.
+   * Collects a splashed bottle.
+   * @param {ThrowableObject} bottle - The bottle.
    */
   collectSplashedBottle(bottle) {
     if (this.world.collectedBottles < 5) {
@@ -159,13 +264,13 @@ class CollisionManager {
       this.world.bottleBar.setPercentage(this.world.collectedBottles * 20)
       window.playBottleSound()
     }
+
     this.world.throwableObjects = this.world.throwableObjects.filter((b) => b !== bottle)
     bottle.destroy()
   }
 
   /**
-   * Prüft Kollisionen mit Flaschen.
-   * Ermöglicht das Einsammeln von Flaschen in der Spielwelt.
+   * Checks collisions with bottles.
    */
   checkBottleCollisions() {
     this.world.level.bottles.forEach((bottle) => {
@@ -176,9 +281,8 @@ class CollisionManager {
   }
 
   /**
-   * Sammelt eine Flasche ein.
-   * Aktualisiert den Flaschenvorrat und entfernt die Flasche aus der Welt.
-   * @param {Bottle} bottle - Die einzusammelnde Flasche.
+   * Collects a bottle.
+   * @param {Bottle} bottle - The bottle.
    */
   collectBottle(bottle) {
     this.world.collectedBottles++
@@ -188,8 +292,7 @@ class CollisionManager {
   }
 
   /**
-   * Prüft Kollisionen mit Münzen.
-   * Ermöglicht das Einsammeln von Münzen in der Spielwelt.
+   * Checks collisions with coins.
    */
   checkCoinCollisions() {
     this.world.level.coins.forEach((coin) => {
@@ -200,9 +303,8 @@ class CollisionManager {
   }
 
   /**
-   * Sammelt eine Münze ein.
-   * Aktualisiert den Münzvorrat und entfernt die Münze aus der Welt.
-   * @param {Coin} coin - Die einzusammelnde Münze.
+   * Collects a coin.
+   * @param {Coin} coin - The coin.
    */
   collectCoin(coin) {
     this.world.collectedCoins++
@@ -211,3 +313,4 @@ class CollisionManager {
     window.playCoinSound()
   }
 }
+

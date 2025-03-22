@@ -1,24 +1,40 @@
+
 let canvas,
 world,
 fullscreenMode = false,
 currentLevel = 1
-const keyboard = new Keyboard(),
-levels = []
+const keyboard = new Keyboard()
+const levels = []
 window.gameRunning = false
 let isRestarting = false
-let gameOverShown = false 
+let gameOverShown = false
 
-
+/**
+ * Initializes the game.
+ */
 function init() {
   initLevels()
   window.initAudio()
   addTouchListeners()
   addKeyboardListeners()
+  setupWindowListeners()
+  prepareGameEnvironment()
+}
+window.init = init
+
+/**
+ * Sets up window event listeners.
+ */
+function setupWindowListeners() {
   window.addEventListener("resize", checkOrientation)
   window.addEventListener("orientationchange", checkOrientation)
   checkOrientation()
-  window.scrollTo(0, 0, checkOrientation)
-  checkOrientation()
+}
+
+/**
+ * Prepares the game environment.
+ */
+function prepareGameEnvironment() {
   window.scrollTo(0, 0)
   toggleStartScreen(true)
   window.playBackgroundMusic()
@@ -26,8 +42,14 @@ function init() {
   window.gameRunning = false
   isRestarting = false
   gameOverShown = false
+  setupCanvas()
+  requestAnimationFrame(gameLoop)
+}
 
-  // Canvas-Element sichtbar machen und Größe setzen
+/**
+ * Sets up the canvas.
+ */
+function setupCanvas() {
   const canvasElement = document.getElementById("canvas")
   if (canvasElement) {
     canvasElement.style.display = "block"
@@ -35,14 +57,10 @@ function init() {
     canvasElement.width = 720
     canvasElement.height = 480
   }
-
-  requestAnimationFrame(gameLoop)
 }
-window.init = init
 
 /**
- * Hauptspiel-Loop, der regelmäßig die Welt aktualisiert.
- * Wird pro Frame aufgerufen.
+ * Main game loop that updates the world on each frame.
  */
 function gameLoop() {
   if (window.gameRunning && world && typeof world.update === "function") {
@@ -52,8 +70,7 @@ function gameLoop() {
 }
 
 /**
- * Fügt Touch-Event-Listener für die mobilen Steuerknöpfe hinzu.
- * Ermöglicht die Steuerung auf Touchscreens.
+ * Adds touch event listeners for mobile controls.
  */
 function addTouchListeners() {
   setupTouchButton("btn-left", "LEFT")
@@ -63,13 +80,14 @@ function addTouchListeners() {
 }
 
 /**
- * Registriert Touch-Event-Listener für einen Button.
- * @param {string} id - Die HTML-ID des Buttons.
- * @param {string} key - Der zu setzende Tastencode.
+ * Registers touch event listeners for a button.
+ * @param {string} id - The HTML ID of the button.
+ * @param {string} key - The key code to set.
  */
 function setupTouchButton(id, key) {
   const btn = document.getElementById(id)
   if (!btn) return
+
   btn.addEventListener(
     "touchstart",
     (e) => {
@@ -78,6 +96,7 @@ function setupTouchButton(id, key) {
     },
     { passive: false },
   )
+
   btn.addEventListener(
     "touchend",
     (e) => {
@@ -89,8 +108,7 @@ function setupTouchButton(id, key) {
 }
 
 /**
- * Lädt alle Level in das levels-Array.
- * Initialisiert die Level-Daten aus den externen Level-Dateien.
+ * Loads all levels into the levels array.
  */
 function initLevels() {
   if (typeof window.initLevel1 === "function") levels[1] = window.initLevel1()
@@ -99,63 +117,93 @@ function initLevels() {
 }
 
 /**
- * Startet das Spiel und initialisiert die Spielwelt.
- * Zeigt den Ladescreen und bereitet das Spielfeld vor.
+ * Starts the game and initializes the game world.
  */
 function startGame() {
   toggleLoader(true)
   setTimeout(() => {
     toggleLoader(false)
     if (window.gameRunning) return
-
-    // Startscreen komplett ausblenden
-    const startScreen = document.getElementById("start-screen")
-    if (startScreen) {
-      startScreen.style.display = "none"
-      startScreen.style.visibility = "hidden"
-    }
-
-    // Game Container an der gleichen Position anzeigen
-    const gameContainer = document.getElementById("game-container")
-    if (gameContainer) {
-      gameContainer.style.display = "block"
-      gameContainer.style.visibility = "visible"
-      gameContainer.classList.remove("d-none")
-    }
-
-    // Canvas sichtbar machen
-    canvas = document.getElementById("canvas")
-    if (canvas) {
-      canvas.style.display = "block"
-      canvas.style.visibility = "visible"
-      canvas.width = 720
-      canvas.height = 480
-    }
-
-    // Mobile Buttons anzeigen wenn nötig
-    const mobileButtons = document.getElementById("mobile-buttons")
-    if (mobileButtons && window.innerWidth < 1024) {
-      mobileButtons.style.display = "flex"
-      mobileButtons.classList.remove("d-none")
-    }
-
+    hideStartScreen()
+    showGameElements()
     initGameWorld()
-    window.gameRunning = true
-
-    if (window.innerWidth < 1024) {
-      document.body.classList.add("game-running-mobile")
-    }
-
-    window.scrollTo(0, 0)
-    if (canvas) canvas.focus()
-    window.playSnoreSound()
+    finalizeGameStart()
   }, 1000)
 }
 window.startGame = startGame
 
 /**
- * Zeigt oder versteckt den Loader.
- * @param {boolean} show - true, um den Loader anzuzeigen.
+ * Hides the start screen.
+ */
+function hideStartScreen() {
+  const startScreen = document.getElementById("start-screen")
+  if (startScreen) {
+    startScreen.style.display = "none"
+    startScreen.style.visibility = "hidden"
+  }
+}
+
+/**
+ * Shows game elements.
+ */
+function showGameElements() {
+  showGameContainer()
+  showCanvas()
+  showMobileButtons()
+}
+
+/**
+ * Shows the game container.
+ */
+function showGameContainer() {
+  const gameContainer = document.getElementById("game-container")
+  if (gameContainer) {
+    gameContainer.style.display = "block"
+    gameContainer.style.visibility = "visible"
+    gameContainer.classList.remove("d-none")
+  }
+}
+
+/**
+ * Shows the canvas.
+ */
+function showCanvas() {
+  canvas = document.getElementById("canvas")
+  if (canvas) {
+    canvas.style.display = "block"
+    canvas.style.visibility = "visible"
+    canvas.width = 720
+    canvas.height = 480
+  }
+}
+
+/**
+ * Shows mobile buttons if necessary.
+ */
+function showMobileButtons() {
+  const mobileButtons = document.getElementById("mobile-buttons")
+  if (mobileButtons && window.innerWidth < 1024) {
+    mobileButtons.style.display = "flex"
+    mobileButtons.classList.remove("d-none")
+  }
+}
+
+/**
+ * Finalizes game start.
+ */
+function finalizeGameStart() {
+  window.gameRunning = true
+  if (window.innerWidth < 1024) {
+    document.body.classList.add("game-running-mobile")
+  }
+  window.scrollTo(0, 0)
+  if (canvas) canvas.focus()
+  window.playSnoreSound()
+}
+
+/**
+ * Toggles the loader overlay.
+ * @param {boolean} show - True to show the loader.
  */
 function toggleLoader(show) {
   const loader = document.getElementById("loader-overlay")
@@ -163,42 +211,58 @@ function toggleLoader(show) {
 }
 
 /**
- * Blendet den Startbildschirm ein oder aus.
- * @param {boolean} show - true, um den Startbildschirm anzuzeigen.
+ * Toggles the start screen visibility.
+ * @param {boolean} show - True to show the start screen.
  */
 function toggleStartScreen(show) {
-  const startScreen = document.getElementById("start-screen")
-  const gameContainer = document.getElementById("game-container")
-  const mobileButtons = document.getElementById("mobile-buttons")
+  toggleStartScreenVisibility(show)
+  toggleGameContainerVisibility(show)
+  toggleMobileButtonsVisibility(show)
+  toggleImpressumVisibility(show)
+}
 
+/**
+ * Toggles start screen visibility.
+ * @param {boolean} show - True to show.
+ */
+function toggleStartScreenVisibility(show) {
+  const startScreen = document.getElementById("start-screen")
   if (startScreen) {
     startScreen.style.display = show ? "flex" : "none"
-    if (show) {
-      startScreen.classList.remove("d-none")
-    } else {
-      startScreen.classList.add("d-none")
-    }
+    startScreen.classList.toggle("d-none", !show)
   }
+}
 
+/**
+ * Toggles game container visibility.
+ * @param {boolean} show - True to show start screen (hide container).
+ */
+function toggleGameContainerVisibility(show) {
+  const gameContainer = document.getElementById("game-container")
   if (gameContainer) {
     gameContainer.style.display = show ? "none" : "block"
-    if (show) {
-      gameContainer.classList.add("d-none")
-    } else {
-      gameContainer.classList.remove("d-none")
-    }
+    gameContainer.classList.toggle("d-none", show)
   }
+}
 
+/**
+ * Toggles mobile buttons visibility.
+ * @param {boolean} show - True to show start screen (hide buttons).
+ */
+function toggleMobileButtonsVisibility(show) {
+  const mobileButtons = document.getElementById("mobile-buttons")
   if (mobileButtons) {
-    mobileButtons.style.display = show || window.innerWidth >= 1024 ? "none" : "flex"
-    if (show || window.innerWidth >= 1024) {
-      mobileButtons.classList.add("d-none")
-    } else {
-      mobileButtons.classList.remove("d-none")
-    }
+    const shouldHide = show || window.innerWidth >= 1024
+    mobileButtons.style.display = shouldHide ? "none" : "flex"
+    mobileButtons.classList.toggle("d-none", shouldHide)
   }
+}
 
-  // Impressum während des Spiels ausblenden
+/**
+ * Toggles impressum button visibility.
+ * @param {boolean} show - True to show.
+ */
+function toggleImpressumVisibility(show) {
   const impressumBtn = document.getElementById("impressum-btn")
   if (impressumBtn) {
     impressumBtn.style.display = show ? "block" : "none"
@@ -206,42 +270,67 @@ function toggleStartScreen(show) {
 }
 
 /**
- * Initialisiert die Spielwelt mit dem aktuellen Level.
- * Erstellt eine neue World-Instanz.
+ * Initializes the game world with the current level.
  */
 function initGameWorld() {
-  if (!levels[currentLevel]) initLevels()
+  if (!levels[currentLevel]) {
+    console.warn("Level not found, initializing levels...")
+    initLevels()
+  }
+
+  if (!levels[currentLevel]) {
+    console.error("Failed to initialize level " + currentLevel)
+    levels[currentLevel] = {
+      enemies: [],
+      clouds: [],
+      backgroundObjects: [],
+      bottles: [],
+      coins: [],
+      level_end_x: 2400,
+    }
+  }
+
   world = new World(canvas, keyboard, levels[currentLevel])
   world.currentLevel = currentLevel
 }
 
 /**
- * Zeigt den Game-Over-Bildschirm an.
- * Stoppt die Spiellogik und spielt den Game-Over-Sound ab.
+ * Shows the game over screen.
  */
 function showGameOver() {
   if (gameOverShown) return
   gameOverShown = true
-  
-  // Alle Sounds stoppen
-  if (typeof window.stopAllSounds === "function") window.stopAllSounds()
-  
-  toggleGameScreens(true)
-  window.gameRunning = false
-  
-  // Welt stoppen und aufräumen
-  if (world && typeof world.stop === "function") {
-    world.stop()
-    world.isGameOver = true
+
+  if (typeof window.stopAllSounds === "function") {
+    window.stopAllSounds().then(() => {
+      toggleGameScreens(true)
+      window.gameRunning = false
+      stopAndCleanupWorld()
+      if (typeof window.playGameOverSound === "function") {
+        setTimeout(() => window.playGameOverSound(), 300)
+      }
+    })
+  } else {
+    toggleGameScreens(true)
+    window.gameRunning = false
+    stopAndCleanupWorld()
   }
-  
-  if (typeof window.playGameOverSound === "function") window.playGameOverSound()
 }
 window.showGameOver = showGameOver
 
 /**
- * Schaltet zwischen den Spielbildschirmen um.
- * @param {boolean} isGameOver - true, wenn Game Over angezeigt werden soll.
+ * Stops and cleans up the world.
+ */
+function stopAndCleanupWorld() {
+  if (world && typeof world.stop === "function") {
+    world.stop()
+    world.isGameOver = true
+  }
+}
+
+/**
+ * Toggles game screens (game container, mobile buttons, game over screen).
+ * @param {boolean} isGameOver - True to show game over screen.
  */
 function toggleGameScreens(isGameOver) {
   document.getElementById("game-container").classList.toggle("d-none", isGameOver)
@@ -250,49 +339,88 @@ function toggleGameScreens(isGameOver) {
 }
 
 /**
- * Setzt das Spiel zurück und startet es neu.
- * Bereinigt den alten Spielzustand und initialisiert einen neuen.
+ * Adds keyboard event listeners.
+ */
+function addKeyboardListeners() {
+  window.addEventListener("keydown", handleKeyDown)
+  window.addEventListener("keyup", handleKeyUp)
+}
+
+/**
+ * Handles key down events.
+ * @param {KeyboardEvent} e - The keyboard event.
+ */
+function handleKeyDown(e) {
+  e.preventDefault() 
+  if (e.keyCode == 39) keyboard.RIGHT = true
+  if (e.keyCode == 37) keyboard.LEFT = true
+  if (e.keyCode == 38) keyboard.UP = true
+  if (e.keyCode == 40) keyboard.DOWN = true
+  if (e.keyCode == 32) keyboard.SPACE = true
+  if (e.keyCode == 68) keyboard.D = true
+}
+
+/**
+ * Handles key up events.
+ * @param {KeyboardEvent} e - The keyboard event.
+ */
+function handleKeyUp(e) {
+  e.preventDefault() 
+
+  if (e.keyCode == 39) keyboard.RIGHT = false
+  if (e.keyCode == 37) keyboard.LEFT = false
+  if (e.keyCode == 38) keyboard.UP = false
+  if (e.keyCode == 40) keyboard.DOWN = false
+  if (e.keyCode == 32) keyboard.SPACE = false
+  if (e.keyCode == 68) keyboard.D = false
+}
+
+/**
+ * Restarts the game.
  */
 function restartGame() {
   if (isRestarting) return
   isRestarting = true
 
   window.stopAllSounds()
+  cleanupOldState()
+  resetGameState()
+  initializeNewGame()
+}
+window.restartGame = restartGame
 
-  // Bereinigen des alten Zustands
+/**
+ * Cleans up the old game state.
+ */
+function cleanupOldState() {
   if (world && typeof world.stop === "function") {
     world.stop()
   }
 
-  // Entfernen aller Overlays
   document.getElementById("victory-overlay")?.remove()
   const gameOverOverlay = document.getElementById("game-over")
   if (gameOverOverlay) gameOverOverlay.classList.add("d-none")
   const gameWonOverlay = document.getElementById("game-won")
   if (gameWonOverlay) gameWonOverlay.classList.add("d-none")
+}
 
-  // Game-Container anzeigen und Mobile-Buttons aktualisieren
+/**
+ * Resets the game state.
+ */
+function resetGameState() {
   toggleStartScreen(false)
-
-  // Spiel auf Level 1 zurücksetzen
   currentLevel = 1
   gameOverShown = false
-
-  // Neu initialisieren
   initLevels()
+}
+
+/**
+ * Initializes a new game.
+ */
+function initializeNewGame() {
   canvas = document.getElementById("canvas")
   if (canvas && levels[1]) {
-    world = new World(canvas, keyboard, levels[1])
-    world.currentLevel = 1
-    world.character.energy = 100
-    
-    // Den Charakter auf die Startposition zurücksetzen
-    if (world.character) {
-      world.character.x = 120 // Startposition X
-      world.character.y = 180 // Startposition Y
-      world.camera_x = 0      // Kamera zurücksetzen
-    }
-    
+    createNewWorld()
     window.gameRunning = true
     if (canvas) canvas.focus()
   }
@@ -302,12 +430,26 @@ function restartGame() {
     isRestarting = false
   }, 200)
 }
-window.restartGame = restartGame
 
 /**
- * Erstellt das Victory-Overlay-Element.
- * @param {number} level - Das aktuelle Level.
- * @returns {HTMLElement} Das erstellte Overlay-Element.
+ * Creates a new world instance.
+ */
+function createNewWorld() {
+  world = new World(canvas, keyboard, levels[1])
+  world.currentLevel = 1
+  world.character.energy = 100
+
+  if (world.character) {
+    world.character.x = 120
+    world.character.y = 180
+    world.camera_x = 0
+  }
+}
+
+/**
+ * Creates the victory overlay element.
+ * @param {number} level - The current level.
+ * @returns {HTMLElement} The overlay element.
  */
 function createVictoryOverlay(level) {
   const ov = document.createElement("div")
@@ -315,6 +457,16 @@ function createVictoryOverlay(level) {
   ov.style =
     "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;"
 
+  addOverlayContent(ov, level)
+  return ov
+}
+
+/**
+ * Adds content to the victory overlay.
+ * @param {HTMLElement} ov - The overlay element.
+ * @param {number} level - The current level.
+ */
+function addOverlayContent(ov, level) {
   const img = document.createElement("img")
   img.src = "img/intro_outro_screens/win/won_2.png"
   img.style = "width:720px; height:480px; object-fit:contain; position:relative; z-index:1;"
@@ -323,15 +475,13 @@ function createVictoryOverlay(level) {
   const textContainer = document.createElement("div")
   textContainer.style =
     "position:relative; bottom:0; width:720px; text-align:center; color:#fff; font-family:'Luckiest Guy', cursive; font-size:32px; z-index:2; margin-top:10px;"
-  textContainer.innerText = level < 3 ? `Du hast Level ${level} abgeschlossen!` : "Du hast das Spiel gewonnen!"
+  textContainer.innerText = level < 3 ? `You have completed Level ${level}!` : "You have won the game!"
   ov.appendChild(textContainer)
-
-  return ov
 }
 
 /**
- * Zeigt den Victory-Screen an.
- * @param {number} level - Das aktuelle Level.
+ * Shows the victory screen.
+ * @param {number} level - The current level.
  */
 function showVictoryScreen(level) {
   const ov = createVictoryOverlay(level)
@@ -344,14 +494,8 @@ function showVictoryScreen(level) {
     window.playGameWinSound()
   }
 
-  // Spiel stoppen
-  window.gameRunning = false
-  
-  if (world && typeof world.stop === "function") {
-    world.stop()
-    world.isGameOver = true
-  }
-  
+  stopGame()
+
   if (level < 3) {
     handleLevelCompletion(ov, level)
   } else {
@@ -361,9 +505,21 @@ function showVictoryScreen(level) {
 window.showVictoryScreen = showVictoryScreen
 
 /**
- * Behandelt den Abschluss eines Levels.
- * @param {HTMLElement} ov - Das Victory-Overlay-Element.
- * @param {number} level - Das aktuelle Level.
+ * Stops the game.
+ */
+function stopGame() {
+  window.gameRunning = false
+
+  if (world && typeof world.stop === "function") {
+    world.stop()
+    world.isGameOver = true
+  }
+}
+
+/**
+ * Handles level completion.
+ * @param {HTMLElement} ov - The victory overlay element.
+ * @param {number} level - The current level.
  */
 function handleLevelCompletion(ov, level) {
   setTimeout(() => {
@@ -376,13 +532,14 @@ function handleLevelCompletion(ov, level) {
 }
 
 /**
- * Behandelt den Abschluss des Spiels.
- * @param {HTMLElement} ov - Das Victory-Overlay-Element.
+ * Handles game completion.
+ * @param {HTMLElement} ov - The victory overlay element.
+ * @param {number} level - The current level.
  */
 function handleGameCompletion(ov) {
   const textContainer = ov.querySelector("div")
   const btn = document.createElement("button")
-  btn.innerText = "Neues Spiel starten"
+  btn.innerText = "Start New Game"
   btn.style =
     "margin-top:20px;padding:15px 30px;font-family:'Luckiest Guy', cursive;font-size:24px;cursor:pointer;border:none;border-radius:10px;background:#ff9900;color:#fff;"
   btn.addEventListener("click", () => {
@@ -393,35 +550,41 @@ function handleGameCompletion(ov) {
 }
 
 /**
- * Wechselt automatisch in den nächsten Level.
- * @param {number} level - Das nächste Level.
+ * Advances to the next level.
+ * @param {number} level - The next level.
  */
 function nextLevel(level) {
   if (level > 3) return showVictoryScreen(3)
-  
+
   currentLevel = level
   window.stopAllSounds()
-  
+
   setTimeout(() => {
-    canvas = document.getElementById("canvas")
-    if (!levels[currentLevel]) initLevels()
-    world = new World(canvas, keyboard, levels[currentLevel])
-    world.currentLevel = currentLevel
-    window.scrollTo(0, 0)
-    setTimeout(() => window.playBackgroundMusic(), 100)
-    window.gameRunning = true
+    initializeNextLevel()
   }, 200)
 }
 window.nextLevel = nextLevel
 
 /**
- * Schaltet in den Vollbildmodus um oder verlässt diesen.
+ * Initializes the next level.
+ */
+function initializeNextLevel() {
+  canvas = document.getElementById("canvas")
+  if (!levels[currentLevel]) initLevels()
+  world = new World(canvas, keyboard, levels[currentLevel])
+  world.currentLevel = currentLevel
+  window.scrollTo(0, 0)
+  setTimeout(() => window.playBackgroundMusic(), 100)
+  window.gameRunning = true
+}
+
+/**
+ * Toggles fullscreen mode.
  */
 function toggleFullscreen() {
   if (window.innerWidth < 1024) {
     return
   }
-
   const el = document.getElementById("game-container")
   fullscreenMode ? exitFullscreen() : requestFullscreen(el)
   fullscreenMode = !fullscreenMode
@@ -429,8 +592,8 @@ function toggleFullscreen() {
 window.toggleFullscreen = toggleFullscreen
 
 /**
- * Fordert den Vollbildmodus für ein Element an.
- * @param {HTMLElement} el - Das Element, das im Vollbildmodus angezeigt werden soll.
+ * Requests fullscreen for an element.
+ * @param {HTMLElement} el - The element to display in fullscreen.
  */
 function requestFullscreen(el) {
   if (el.requestFullscreen) el.requestFullscreen()
@@ -439,7 +602,7 @@ function requestFullscreen(el) {
 }
 
 /**
- * Beendet den Vollbildmodus.
+ * Exits fullscreen mode.
  */
 function exitFullscreen() {
   if (document.exitFullscreen) document.exitFullscreen()
@@ -448,44 +611,7 @@ function exitFullscreen() {
 }
 
 /**
- * Fügt Keyboard-Event-Listener hinzu.
- */
-function addKeyboardListeners() {
-  window.addEventListener("keydown", handleKeyDown)
-  window.addEventListener("keyup", handleKeyUp)
-}
-
-/**
- * Verarbeitet Tastendrücke.
- * @param {KeyboardEvent} e - Das Keyboard-Event.
- */
-function handleKeyDown(e) {
-  if (e.keyCode == 39) keyboard.RIGHT = true
-  if (e.keyCode == 37) keyboard.LEFT = true
-  if (e.keyCode == 38) keyboard.UP = true
-  if (e.keyCode == 40) keyboard.DOWN = true
-  if (e.keyCode == 32) {
-    keyboard.SPACE = true
-    e.preventDefault()
-  }
-  if (e.keyCode == 68) keyboard.D = true
-}
-
-/**
- * Verarbeitet das Loslassen von Tasten.
- * @param {KeyboardEvent} e - Das Keyboard-Event.
- */
-function handleKeyUp(e) {
-  if (e.keyCode == 39) keyboard.RIGHT = false
-  if (e.keyCode == 37) keyboard.LEFT = false
-  if (e.keyCode == 38) keyboard.UP = false
-  if (e.keyCode == 40) keyboard.DOWN = false
-  if (e.keyCode == 32) keyboard.SPACE = false
-  if (e.keyCode == 68) keyboard.D = false
-}
-
-/**
- * Überprüft die aktuelle Geräteaussrichtung und passt die Anzeige an.
+ * Checks the device orientation and adjusts display.
  */
 function checkOrientation() {
   const isMobile = window.innerWidth < 1024
@@ -494,9 +620,9 @@ function checkOrientation() {
 }
 
 /**
- * Passt die Anzeige der Elemente je nach Gerätetyp und Ausrichtung an.
- * @param {boolean} isMobile - true, wenn es sich um ein mobiles Gerät handelt.
- * @param {boolean} isPortrait - true, wenn das Gerät im Hochformat ist.
+ * Updates device display based on mobile/desktop and orientation.
+ * @param {boolean} isMobile - True if on mobile.
+ * @param {boolean} isPortrait - True if in portrait orientation.
  */
 function updateDeviceDisplay(isMobile, isPortrait) {
   const mobileButtons = document.getElementById("mobile-buttons")
@@ -511,70 +637,71 @@ function updateDeviceDisplay(isMobile, isPortrait) {
 }
 
 /**
- * Aktualisiert die Anzeige für mobile Geräte.
- * @param {HTMLElement} mobileButtons - Die mobilen Steuerungsbuttons.
- * @param {HTMLElement} rotateDevice - Die Rotationsaufforderung.
- * @param {HTMLElement} content - Der Hauptinhalt.
- * @param {boolean} isPortrait - true, wenn das Gerät im Hochformat ist.
+ * Updates mobile display.
+ * @param {HTMLElement} mobileButtons
+ * @param {HTMLElement} rotateDevice
+ * @param {HTMLElement} content
+ * @param {boolean} isPortrait
  */
 function updateMobileDisplay(mobileButtons, rotateDevice, content, isPortrait) {
-  if (window.gameRunning && mobileButtons) mobileButtons.classList.remove("d-none")
   if (isPortrait) {
-    if (rotateDevice) rotateDevice.style.display = "flex"
-    if (content) content.style.display = "none"
+    mobileButtons.style.display = "none"
+    rotateDevice.style.display = "flex"
+    content.style.display = "none"
   } else {
-    if (rotateDevice) rotateDevice.style.display = "none"
-    if (content) content.style.display = "flex"
-  }
-
-  const heading = document.querySelector("h1")
-  if (heading) heading.style.display = "none"
-
-  if (window.gameRunning) {
-    document.body.classList.add("game-running-mobile")
+    mobileButtons.style.display = "flex"
+    rotateDevice.style.display = "none"
+    content.style.display = "block"
   }
 }
 
 /**
- * Aktualisiert die Anzeige für Desktop-Geräte.
- * @param {HTMLElement} mobileButtons - Die mobilen Steuerungsbuttons.
- * @param {HTMLElement} rotateDevice - Die Rotationsaufforderung.
- * @param {HTMLElement} content - Der Hauptinhalt.
+ * Updates desktop display.
+ * @param {HTMLElement} mobileButtons
+ * @param {HTMLElement} rotateDevice
+ * @param {HTMLElement} content
  */
 function updateDesktopDisplay(mobileButtons, rotateDevice, content) {
-  if (mobileButtons) mobileButtons.classList.add("d-none")
-  if (rotateDevice) rotateDevice.style.display = "none"
-  if (content) content.style.display = "flex"
-
-  const heading = document.querySelector("h1")
-  if (heading) heading.style.display = "block"
-
-  document.body.classList.remove("game-running-mobile")
+  mobileButtons.style.display = "none"
+  rotateDevice.style.display = "none"
+  content.style.display = "block"
 }
 
 /**
- * Zeigt das Instruktions-Overlay an.
+ * Shows instructions overlay.
  */
 function showInstructions() {
-  document.getElementById("instructions-overlay").classList.remove("d-none")
+  const instructionsOverlay = document.getElementById("instructions-overlay")
+  if (instructionsOverlay) {
+    instructionsOverlay.classList.remove("d-none")
+  }
 }
 window.showInstructions = showInstructions
 
 /**
- * Schließt das Instruktions-Overlay.
+ * Closes instructions overlay.
  */
 function closeInstructions() {
-  document.getElementById("instructions-overlay").classList.add("d-none")
+  const instructionsOverlay = document.getElementById("instructions-overlay")
+  if (instructionsOverlay) {
+    instructionsOverlay.classList.add("d-none")
+  }
 }
 window.closeInstructions = closeInstructions
 
 /**
- * Erkennt, ob die aktuelle Seite die Impressum-Seite ist und fügt die entsprechende Klasse hinzu.
+ * Navigates to impressum page.
  */
-function checkIfImpressumPage() {
-  if (window.location.href.includes("impressum.html")) {
-    document.body.classList.add("impressum-page")
-  }
+function navigateToImpressum() {
+  window.location.href = "impressum.html"
 }
+window.navigateToImpressum = navigateToImpressum
 
-window.addEventListener("DOMContentLoaded", checkIfImpressumPage)
+/**
+ * Navigates back to home/game page.
+ */
+function navigateToHome() {
+  window.location.href = "index.html"
+}
+window.navigateToHome = navigateToHome
+

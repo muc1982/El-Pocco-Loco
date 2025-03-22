@@ -73,15 +73,12 @@ class Character extends MoveableObject {
     "img/character_pepe/dead/D-57.png",
   ]
 
-
   world
   constructor() {
     super()
     this.loadImage("img/character_pepe/idle/idle/I-1.png")
     this.loadAllImages()
     this.applyGravity()
-
-    // Controller initialisieren
     this.animationController = new CharacterAnimationController(this)
     this.movementController = new CharacterMovementController(this)
 
@@ -89,8 +86,7 @@ class Character extends MoveableObject {
   }
 
   /**
-   * Lädt alle Bilder für die Animationen.
-   * Lädt die verschiedenen Bildsets für die Animationszustände.
+   * Loads all animation images.
    */
   loadAllImages() {
     if (this.IMAGES_IDLE) this.loadImages(this.IMAGES_IDLE)
@@ -102,8 +98,7 @@ class Character extends MoveableObject {
   }
 
   /**
-   * Startet die Animationen.
-   * Initialisiert die Animation- und Bewegungscontroller.
+   * Starts animations.
    */
   animate() {
     this.animationController.initialize()
@@ -111,46 +106,41 @@ class Character extends MoveableObject {
   }
 
   /**
-   * Aktualisiert den Zeitpunkt der letzten Aktion des Charakters.
-   * Wird bei jeder Benutzeraktion aufgerufen.
+   * Updates the last action timestamp.
    */
   updateLastAction() {
     this.lastAction = new Date().getTime()
   }
 
   /**
-   * Prüft, ob der Charakter sich im Leerlauf befindet.
-   * Bestimmt, ob der Charakter in den Schlafmodus wechseln soll.
-   * @returns {boolean} True, wenn der Charakter länger als die Leerlaufzeit inaktiv war.
+   * Checks if the character is idle.
+   * @returns {boolean} True if idle.
    */
   isIdle() {
     return new Date().getTime() - this.lastAction > this.idleTimeout
   }
 
-/**
- * Verringert die Energie des Charakters bei einem Treffer.
- * Aktualisiert den Verletzungszeitpunkt für die Verletzungsanimation.
- * Löst bei 0 Energie sofort das Game Over aus.
- * @param {number} damage - Der Schaden, der zugefügt wird (Standard: 25).
- */
-hit(damage = 25) {
-  // Keine mehrfachen Treffer, wenn bereits verletzt
-  if (!this.isHurt() && !this.isDead() && window.gameRunning) {
-    this.energy = Math.max(0, this.energy - damage);
-    this.lastHit = new Date().getTime();
-    
-    // Aktualisierung der StatusBar
-    if (this.world && this.world.statusBar) {
-      this.world.statusBar.setPercentage(this.energy);
-    }
-    
-    // Wenn Energie auf 0 sinkt, sofortiges Game Over
-    if (this.energy <= 0 && typeof window.showGameOver === 'function' && window.gameRunning) {
-      setTimeout(() => {
-        window.showGameOver();
-      }, 200); // Kurze Verzögerung für den Tod
+  /**
+   * Reduces energy when hit.
+   * @param {number} damage - Damage (default: 25).
+   */
+  hit(damage = 25) {
+    if (!this.isHurt() && !this.isDead() && window.gameRunning) {
+      this.energy = Math.max(0, this.energy - damage)
+      this.lastHit = new Date().getTime()
+
+      if (this.world && this.world.statusBar) {
+        this.world.statusBar.setPercentage(this.energy)
+      }
+
+      if (this.energy <= 0 && typeof window.showGameOver === "function" && window.gameRunning) {
+        setTimeout(() => {
+          window.showGameOver()
+        }, 500)
+      } else {
+        window.playHurtSound()
+      }
     }
   }
-}
 }
 

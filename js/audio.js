@@ -1,8 +1,8 @@
 let backgroundMusic, walkingSound, jumpSound, bottleSound, chickenSound, coinSound
 let hurtSound, gameOverSound, gameWinSound, endbossHurtSound, snoreSound
 let isMuted = false,
-audioInitialized = false,
-audioPlayRequested = false
+  audioInitialized = false,
+  audioPlayRequested = false
 
 function initAudio() {
   if (audioInitialized) return
@@ -10,10 +10,22 @@ function initAudio() {
   checkSavedMuteState()
   preloadAudio()
   audioInitialized = true
-  tryPlayBackgroundMusic()
+  document.addEventListener("click", enableAudioOnFirstClick, { once: true })
 }
 window.initAudio = initAudio
 
+/**
+ * Enables audio on first click
+ */
+function enableAudioOnFirstClick() {
+  if (!isMuted) {
+    tryPlayBackgroundMusic()
+  }
+}
+
+/**
+ * Loads all audio files.
+ */
 function loadAudioFiles() {
   backgroundMusic = new Audio("audio/hintergrundmusik.mp3")
   backgroundMusic.loop = true
@@ -43,7 +55,7 @@ function loadAudioFiles() {
 }
 
 /**
- * Prüft den gespeicherten Mute-Status und wendet ihn an.
+ * Checks saved mute state and applies it.
  */
 function checkSavedMuteState() {
   const saved = localStorage.getItem("isMuted")
@@ -54,7 +66,7 @@ function checkSavedMuteState() {
 }
 
 /**
- * Versucht, die Hintergrundmusik abzuspielen.
+ * Attempts to play background music.
  */
 function tryPlayBackgroundMusic() {
   if (isMuted) return
@@ -73,24 +85,23 @@ function tryPlayBackgroundMusic() {
 }
 
 /**
- * Richtet Event-Listener für Benutzerinteraktionen ein.
+ * Sets up event listeners for user interaction.
  */
 function setupUserInteractionListeners() {
-  ;["click", "touchstart", "keydown"].forEach((e) => document.addEventListener(e, enableAudio, { once: true }))
+  document.addEventListener("click", enableAudio, { once: true })
 }
 
 /**
- * Aktiviert die Audio-Wiedergabe nach Benutzerinteraktion.
+ * Enables audio playback after user interaction.
  */
 function enableAudio() {
   if (isMuted) return
-    ;["click", "touchstart", "keydown"].forEach((e) => document.removeEventListener(e, enableAudio))
   setTimeout(() => playBackgroundMusic(), 100)
 }
 window.enableAudio = enableAudio
 
 /**
- * Lädt alle Audio-Dateien vor und richtet einen Event-Listener ein.
+ * Preloads all audio files and sets up an event listener.
  */
 function preloadAudio() {
   const audioList = [
@@ -107,11 +118,10 @@ function preloadAudio() {
     snoreSound,
   ]
   audioList.forEach((a) => a && a.load())
-  document.addEventListener("click", enableAudio, { once: true })
 }
 
 /**
- * Spielt die Hintergrundmusik ab.
+ * Plays the background music.
  */
 function playBackgroundMusic() {
   if (isMuted || !backgroundMusic) return
@@ -129,8 +139,8 @@ function playBackgroundMusic() {
 window.playBackgroundMusic = playBackgroundMusic
 
 /**
- * Stoppt alle Sounds und gibt ein Promise zurück.
- * @returns {Promise} Ein Promise, das nach 100ms aufgelöst wird.
+ * Stops all sounds and returns a Promise.
+ * @returns {Promise} A Promise that resolves after 100ms.
  */
 function stopAllSounds() {
   audioPlayRequested = false
@@ -158,7 +168,7 @@ function stopAllSounds() {
 window.stopAllSounds = stopAllSounds
 
 /**
- * Schaltet den Ton ein oder aus.
+ * Toggles sound on or off.
  */
 function toggleMute() {
   isMuted = !isMuted
@@ -169,7 +179,7 @@ function toggleMute() {
 window.toggleMute = toggleMute
 
 /**
- * Aktualisiert das Mute-Icon basierend auf dem aktuellen Status.
+ * Updates the mute icon based on current status.
  */
 function updateMuteIcon() {
   const vol = document.getElementById("volume-icon")
@@ -183,39 +193,43 @@ function updateMuteIcon() {
 window.updateMuteIcon = updateMuteIcon
 
 /**
- * Spielt den Game-Over-Sound ab.
+ * Plays the game over sound.
  */
 function playGameOverSound() {
   if (!isMuted && gameOverSound) {
-    stopAllSounds()
-    gameOverSound.currentTime = 0
-    gameOverSound.play().catch(() => { })
-    if (!window.gameOverSound) window.gameOverSound = new Audio("audio/gameover_gelache.mp3")
+    stopAllSounds().then(() => {
+      gameOverSound.currentTime = 0
+      gameOverSound.play().catch(() => {
+      })
+    })
   }
 }
 window.playGameOverSound = playGameOverSound
 
 /**
- * Spielt den Game-Win-Sound ab.
+ * Plays the game win sound.
  */
 function playGameWinSound() {
   if (!isMuted && gameWinSound) {
-    stopAllSounds()
-    gameWinSound.play().catch(() => { })
+    stopAllSounds().then(() => {
+      gameWinSound.currentTime = 0
+      gameWinSound.play().catch(() => {
+      })
+    })
   }
 }
 window.playGameWinSound = playGameWinSound
 
 /**
- * Spielt den Walking-Sound ab.
+ * Plays the walking sound.
  */
 function playWalkingSound() {
-  if (!isMuted && walkingSound && walkingSound.paused) walkingSound.play().catch(() => { })
+  if (!isMuted && walkingSound && walkingSound.paused) walkingSound.play().catch(() => {})
 }
 window.playWalkingSound = playWalkingSound
 
 /**
- * Stoppt den Walking-Sound.
+ * Stops the walking sound.
  */
 function stopWalkingSound() {
   if (walkingSound) {
@@ -226,62 +240,62 @@ function stopWalkingSound() {
 window.stopWalkingSound = stopWalkingSound
 
 /**
- * Spielt den Jump-Sound ab.
+ * Plays the jump sound.
  */
 function playJumpSound() {
   if (!isMuted && jumpSound) {
     jumpSound.currentTime = 0
-    jumpSound.play().catch(() => { })
+    jumpSound.play().catch(() => {})
   }
 }
 window.playJumpSound = playJumpSound
 
 /**
- * Spielt den Bottle-Sound ab.
+ * Plays the bottle sound.
  */
 function playBottleSound() {
   if (!isMuted && bottleSound) {
     bottleSound.currentTime = 0
-    bottleSound.play().catch(() => { })
+    bottleSound.play().catch(() => {})
   }
 }
 window.playBottleSound = playBottleSound
 
 /**
- * Spielt den Chicken-Sound ab.
+ * Plays the chicken sound.
  */
 function playChickenSound() {
   if (!isMuted && chickenSound) {
     chickenSound.currentTime = 0
-    chickenSound.play().catch(() => { })
+    chickenSound.play().catch(() => {})
   }
 }
 window.playChickenSound = playChickenSound
 
 /**
- * Spielt den Coin-Sound ab.
+ * Plays the coin sound.
  */
 function playCoinSound() {
   if (!isMuted && coinSound) {
     coinSound.currentTime = 0
-    coinSound.play().catch(() => { })
+    coinSound.play().catch(() => {})
   }
 }
 window.playCoinSound = playCoinSound
 
 /**
- * Spielt den Hurt-Sound ab.
+ * Plays the hurt sound.
  */
 function playHurtSound() {
   if (!isMuted && hurtSound) {
     hurtSound.currentTime = 0
-    hurtSound.play().catch(() => { })
+    hurtSound.play().catch(() => {})
   }
 }
 window.playHurtSound = playHurtSound
 
 /**
- * Stoppt den Snore-Sound.
+ * Stops the snore sound.
  */
 function stopSnoreSound() {
   if (snoreSound) {
@@ -292,12 +306,37 @@ function stopSnoreSound() {
 window.stopSnoreSound = stopSnoreSound
 
 /**
- * Spielt den Snore-Sound ab.
+ * Plays the snore sound.
  */
 function playSnoreSound() {
   if (!isMuted && snoreSound && snoreSound.paused) {
-    snoreSound.play().catch(() => { })
+    snoreSound.play().catch(() => {})
   }
 }
 window.playSnoreSound = playSnoreSound
+
+/**
+ * Plays the fireball sound.
+ */
+function playFireballSound() {
+  if (!isMuted) {
+    const fireballSound = new Audio("audio/fireball.mp3")
+    fireballSound.volume = 0.4
+    fireballSound.play().catch(() => {
+    })
+  }
+}
+window.playFireballSound = playFireballSound
+
+/**
+ * Plays the endboss hurt sound.
+ */
+function playEndbossHurtSound() {
+  if (!isMuted && endbossHurtSound) {
+    endbossHurtSound.currentTime = 0
+    endbossHurtSound.play().catch(() => {
+    })
+  }
+}
+window.playEndbossHurtSound = playEndbossHurtSound
 

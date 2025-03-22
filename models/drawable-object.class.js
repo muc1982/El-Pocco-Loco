@@ -1,48 +1,44 @@
 class DrawableObject {
-  img
-  imageCache = {}
-  currentImage = 0
-  x = 120
-  y = 280
-  height = 150
-  width = 100
+  img;
+  imageCache = {};
+  currentImage = 0;
+  x = 120;
+  y = 280;
+  height = 150;
+  width = 100;
 
   /**
-   * Lädt ein einzelnes Bild.
-   *
-   * @param {string} path - Der Pfad zum Bild.
+   * Loads a single image.
+   * @param {string} path - The image path.
    */
   loadImage(path) {
-    this.img = new Image()
-    this.img.src = path
+    this.img = new Image();
+    this.img.src = path;
   }
 
   /**
-   * Lädt mehrere Bilder und speichert diese im Cache.
-   *
-   * @param {string[]} arr - Array mit den Pfaden der Bilder.
+   * Loads multiple images and caches them.
+   * @param {string[]} arr - Array of image paths.
    */
   loadImages(arr) {
     arr.forEach((path) => {
-      const img = new Image()
-      img.src = path
-      this.imageCache[path] = img
-    })
+      const img = new Image();
+      img.src = path;
+      this.imageCache[path] = img;
+    });
   }
 
   /**
-   * Zeichnet das Objekt auf den übergebenen Zeichenkontext.
-   *
-   * @param {CanvasRenderingContext2D} ctx - Der Zeichenkontext des Canvas.
+   * Draws the object on the canvas.
+   * @param {CanvasRenderingContext2D} ctx - The canvas context.
    */
   draw(ctx) {
-    ctx.drawImage(this.img, this.x, this.y, this.width, this.height)
+    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
   }
 
   /**
-   * Zeichnet einen Rahmen um das Objekt, wenn es von bestimmten Klassen erbt.
-   *
-   * @param {CanvasRenderingContext2D} ctx - Der Zeichenkontext des Canvas.
+   * Draws a frame around the object if applicable.
+   * @param {CanvasRenderingContext2D} ctx - The canvas context.
    */
   drawFrame(ctx) {
     if (
@@ -52,11 +48,11 @@ class DrawableObject {
       this instanceof Coin ||
       this instanceof Bottle
     ) {
-      ctx.beginPath()
-      ctx.lineWidth = "5"
-      ctx.strokeStyle = "blue"
-      ctx.rect(this.x, this.y, this.width, this.height)
-      ctx.stroke()
+      ctx.beginPath();
+      ctx.lineWidth = "5";
+      ctx.strokeStyle = "blue";
+      ctx.rect(this.x, this.y, this.width, this.height);
+      ctx.stroke();
     }
   }
 }

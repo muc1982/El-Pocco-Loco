@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- Meta-Tags für Web-App-Fähigkeit -->
+
+    <!-- Meta tags for web app capability -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
-    <!-- Android-spezifische Meta-Tags -->
+
+    <!-- Android-specific meta tags -->
     <meta name="theme-color" content="#000000">
     <meta name="application-name" content="El Pollo Loco">
-    
-    <!-- iOS-spezifische Meta-Tags -->
+
+    <!-- iOS-specific meta tags -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="El Pollo Loco">
-    
-    <!-- Style und Favicon -->
+
+    <!-- Styles and Favicon -->
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="img/favicon/favicon.png">
-    
-    <!-- App-Icons für Android und iOS -->
+
+    <!-- App Icons for Android and iOS -->
     <link rel="apple-touch-icon" href="img/favicon/favicon.png">
     <link rel="shortcut icon" sizes="192x192" href="img/favicon/favicon.png">
 
@@ -29,8 +29,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
-    
-    <title>Impressum - El Pollo Loco</title>
+
+    <title>Imprint</title>
     <style>
         .impressum-container {
             background-color: rgba(0, 0, 0, 0.7);
@@ -70,22 +70,20 @@
             background-color: #ffaa33;
         }
 
-        /* Scrollen im Impressum erzwingen */
-        html, body {
+        html,
+        body {
             overflow: auto !important;
             -webkit-overflow-scrolling: touch !important;
             height: 100% !important;
             position: relative !important;
         }
-        
-        /* Spezielle Anpassungen für iOS */
+
         @supports (-webkit-touch-callout: none) {
             body {
-                /* iOS-spezifische Styles */
                 position: static !important;
                 overflow-y: auto !important;
             }
-            
+
             #content {
                 height: auto !important;
                 min-height: 100vh !important;
@@ -93,15 +91,14 @@
                 padding-bottom: 50px !important;
             }
         }
-        
-        /* Mobile Anpassungen */
+
         @media only screen and (max-width: 768px) {
             .impressum-container {
                 margin: 10px;
                 padding: 20px;
                 border-radius: 5px;
             }
-            
+
             body {
                 background-color: #000 !important;
             }
@@ -111,53 +108,36 @@
 
 <body class="impressum-page">
     <div id="content">
-        <h1>Impressum</h1>
-
         <div class="impressum-container">
-            <h2>Angaben gemäß § 5 TMG</h2>
+            <h2>Information according to § 5 TMG</h2>
             <p>Max Mustermann<br>
                 Musterstraße 123<br>
                 12345 Musterstadt<br>
-                Deutschland</p>
-
-            <h2>Kontakt</h2>
-            <p>Telefon: +49 123 456789<br>
+                Germany</p>
+            <h2>Contact</h2>
+            <p>Phone: +49 123 456789<br>
                 E-Mail: info@example.com</p>
-
-            <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+            <h2>Responsible for the content according to § 55 Abs. 2 RStV</h2>
             <p>Max Mustermann<br>
                 Musterstraße 123<br>
                 12345 Musterstadt</p>
-
-            <h2>Haftungsausschluss</h2>
-            <p>Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und
-                Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.</p>
-
-            <h2>Urheberrecht</h2>
-            <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
-                Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der
-                Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
-            </p>
-
-            <button onclick="navigateToHome()" class="back-btn">Zurück zum Spiel</button>
+            <h2>Disclaimer</h2>
+            <p>The content of this page has been created with the utmost care. However, we cannot guarantee its
+                accuracy, completeness, or timeliness.</p>
+            <h2>Copyright</h2>
+            <p>The content and works created by the site operators are subject to German copyright. Duplication,
+                modification, distribution, and any form of exploitation outside the limits of copyright require the
+                written consent of the respective author.</p>
+            <button onclick="navigateToHome()" class="back-btn">Back to Game</button>
         </div>
     </div>
-    
     <script>
-        // Stellt sicher, dass das Scrollen auf iOS-Geräten funktioniert
-        document.addEventListener('touchmove', function(e) {
-            // Erlaubt das Scrollen
-        }, { passive: true });
-        
-        // Funktion zum Zurückkehren zur Hauptseite
+        document.addEventListener('touchmove', function (e) {
+        }, { passive: false });
         function navigateToHome() {
             window.location.href = "index.html";
         }
-        
-        // Fügt die Klasse für die Impressum-Seite hinzu
-        document.body.classList.add('impressum-page');
     </script>
 </body>
 
 </html>
-

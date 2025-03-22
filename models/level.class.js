@@ -7,12 +7,12 @@ class Level {
   level_end_x = 2400;
 
   /**
-   * Erzeugt ein neues Level.
-   * @param {MoveableObject[]} enemies - Gegner.
-   * @param {Cloud[]} clouds - Wolken.
-   * @param {BackgroundObject[]} backgroundObjects - Hintergrund.
-   * @param {Bottle[]} bottles - Flaschen.
-   * @param {Coin[]} coins - Münzen.
+   * Creates a new level.
+   * @param {MoveableObject[]} enemies - Enemies.
+   * @param {Cloud[]} clouds - Clouds.
+   * @param {BackgroundObject[]} backgroundObjects - Background objects.
+   * @param {Bottle[]} bottles - Bottles.
+   * @param {Coin[]} coins - Coins.
    */
   constructor(enemies, clouds, backgroundObjects, bottles, coins) {
     this.enemies = enemies;

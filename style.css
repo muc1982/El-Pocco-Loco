@@ -17,7 +17,7 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
   position: relative;
-  overflow: hidden; /* Unterdrückt Scrollbalken fürs Spiel */
+  overflow: hidden; /* Hide scrollbars for game */
 }
 
 h1 {
@@ -29,7 +29,7 @@ h1 {
   width: 100%;
 }
 
-/* Zentriere den gesamten Inhalt */
+/* Center all content */
 #content {
   position: relative;
   display: flex;
@@ -43,7 +43,7 @@ h1 {
   padding: 0;
 }
 
-/* Positioniere Start-Screen und Game-Container zentral */
+/* Position start screen and game container centrally */
 #start-screen,
 #game-container,
 #game-over,
@@ -95,7 +95,7 @@ h1 {
   gap: 20px;
 }
 
-/* Stil für den Mute-Button auf dem Startbildschirm */
+/* Mute button style on start screen */
 .start-overlay-button {
   position: absolute;
   top: 10px;
@@ -139,8 +139,7 @@ h1 {
   background-color: #ffaa33;
 }
 
-/* Stelle sicher, dass Canvas immer sichtbar ist */
-/* Stelle sicher, dass Canvas die volle Größe des Containers einnimmt */
+/* Ensure canvas is visible and fills container */
 canvas {
   background-color: black;
   display: block;
@@ -148,8 +147,8 @@ canvas {
   height: 100%;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  visibility: visible !important; /* Erzwinge Sichtbarkeit */
-  z-index: 25; /* Höherer z-index als andere Elemente */
+  visibility: visible !important;
+  z-index: 25;
 }
 
 #overlay-buttons {
@@ -248,7 +247,7 @@ canvas {
   margin-top: 20px;
 }
 
-/* Verbesserte Darstellung des Footers */
+/* Footer styling */
 #footer {
   position: absolute;
   bottom: 10px;
@@ -270,7 +269,6 @@ canvas {
   text-decoration: underline;
 }
 
-/* Stelle sicher, dass die d-none Klasse wirklich Elemente versteckt */
 .d-none {
   display: none !important;
   visibility: hidden !important;
@@ -394,7 +392,7 @@ canvas {
   perspective: 1000px;
 }
 
-/* Loader-Styling */
+/* Loader styling */
 #loader-overlay {
   position: fixed;
   top: 0;
@@ -426,7 +424,44 @@ canvas {
   }
 }
 
-/* Verbesserte Darstellung für mobile Geräte */
+/* Impressum Link Styling */
+.impressum-link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "Luckiest Guy", cursive;
+  font-size: 14px;
+  z-index: 30;
+}
+
+.impressum-link:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Impressum Page Styling */
+.impressum-page {
+  background-color: #000;
+  overflow: auto !important;
+}
+
+.impressum-page #content {
+  height: auto;
+  min-height: 100vh;
+  padding: 20px 0;
+  justify-content: flex-start;
+}
+
+.impressum-page h1 {
+  margin-top: 40px;
+}
+
+/* Mobile adjustments */
 @media only screen and (max-width: 768px) {
   #content {
     width: 100%;
@@ -434,7 +469,6 @@ canvas {
     padding: 0 !important;
     margin: 0 !important;
   }
-
   #game-container,
   #start-screen {
     width: 100%;
@@ -448,172 +482,25 @@ canvas {
     left: 50%;
     transform: translate(-50%, -50%);
   }
-
   html,
   body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden !important; /* Verhindert jegliches Scrollen */
-    position: fixed; /* Fixiert den Body, um Scrolling zu verhindern */
+    overflow: hidden !important;
+    position: fixed;
     background-image: none !important;
     background-color: #000 !important;
   }
-
-  /* Zentriert den Inhalt vertikal und horizontal */
-  /* Anpassung für mobile Geräte */
-  /* Canvas auf Bildschirmgröße anpassen */
-  canvas {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 720 / 480; /* Behält das Seitenverhältnis bei */
-    max-height: 80vh; /* Verhindert, dass der Canvas zu groß wird */
-  }
-
-  /* Überschrift verkleinern */
-  h1 {
-    font-size: 24px;
-    margin: 10px 0;
-  }
-
-  /* Mobile Buttons anpassen */
-  #mobile-buttons {
-    position: absolute;
-    bottom: 10px;
-    width: 100%;
-    padding: 0 10px;
-    box-sizing: border-box;
-    z-index: 100;
-    display: flex !important;
-  }
-
-  /* Footer anpassen */
-  #footer {
-    position: absolute;
-    bottom: 5px;
-    margin: 0;
-  }
-
-  .start-btn,
-  .instructions-btn,
-  .restart-btn,
-  .close-btn {
-    font-size: 20px;
-    padding: 10px 20px;
-  }
-}
-
-/* Spezifische Anpassungen für sehr kleine Bildschirme */
-@media only screen and (max-width: 375px) {
-  h1 {
-    font-size: 20px;
-  }
-
-  .mobile-btn {
-    width: 50px;
-    height: 50px;
-  }
-}
-
-@media (orientation: portrait) and (max-width: 1023px) {
-  #content {
-    display: none;
-  }
-  #rotate-device {
-    display: flex;
-  }
-}
-
-/* Anpassung der Medienabfrage für mobile Buttons */
-@media (min-width: 1024px) {
-  #mobile-buttons {
-    display: none !important;
-  }
-}
-
-.mobile-btn:active {
-  background: rgba(255, 153, 0, 0.7);
-  transform: scale(0.95);
-}
-
-/* Responsive Anpassungen */
-@media only screen and (max-width: 1023px) {
-  body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    background-image: none !important;
-  }
-
-  h1 {
-    display: none; /* Überschrift ausblenden */
-  }
-
-  #content {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* Startscreen optimieren */
-  #start-screen {
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 0;
-    box-shadow: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  #start-screen img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Spielcontainer im Vollbildmodus */
-  #game-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
   canvas {
     width: 100%;
     height: 100%;
     object-fit: contain;
     background-color: #000;
   }
-
-  /* Game Over und Victory Screens anpassen */
   #game-over,
   #game-won {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
     max-width: 100%;
@@ -622,8 +509,6 @@ canvas {
     border-radius: 0;
     box-shadow: none;
   }
-
-  /* Buttons für mobile Geräte optimieren */
   .start-btn,
   .instructions-btn,
   .restart-btn,
@@ -631,8 +516,6 @@ canvas {
     padding: 15px 30px;
     font-size: 20px;
   }
-
-  /* Mobile Buttons für Spielsteuerung */
   #mobile-buttons {
     position: absolute;
     bottom: 20px;
@@ -642,19 +525,14 @@ canvas {
     box-sizing: border-box;
     z-index: 100;
   }
-
   .mobile-btn {
     width: 60px;
     height: 60px;
   }
-
-  /* Overlay-Buttons (Fullscreen, Mute) */
   #overlay-buttons {
     top: 20px;
     right: 20px;
   }
-
-  /* Footer mit Impressum */
   #footer {
     position: absolute;
     bottom: 5px;
@@ -663,30 +541,20 @@ canvas {
     text-align: center;
     z-index: 100;
   }
-
-  /* Instruktionen-Overlay anpassen */
-  #instructions-overlay {
-    z-index: 1001;
-  }
-
   .instructions-content {
     width: 90%;
     max-width: 90%;
     padding: 20px;
   }
-
-  /* Rotate-Device-Hinweis anpassen */
   #rotate-device {
     z-index: 1002;
   }
-
-  /* Füge diese Regel hinzu, um den Fullscreen-Button auf mobilen Geräten auszublenden */
   #fullscreen-btn {
     display: none !important;
   }
 }
 
-/* Spezifische Anpassungen für sehr kleine Bildschirme */
+/* Adjustments for very small screens */
 @media only screen and (max-width: 375px) {
   .start-btn,
   .instructions-btn,
@@ -695,34 +563,29 @@ canvas {
     padding: 10px 20px;
     font-size: 18px;
   }
-
   .mobile-btn {
     width: 50px;
     height: 50px;
   }
-
   .mobile-btn img {
     width: 25px;
     height: 25px;
   }
-
   .start-buttons {
     bottom: 30px;
   }
 }
 
-/* Anpassungen für Tablets */
+/* Tablet adjustments */
 @media only screen and (min-width: 768px) and (max-width: 1023px) {
   .mobile-btn {
     width: 70px;
     height: 70px;
   }
-
   .mobile-btn img {
     width: 35px;
     height: 35px;
   }
-
   .start-btn,
   .instructions-btn,
   .restart-btn,
@@ -732,7 +595,7 @@ canvas {
   }
 }
 
-/* Querformat-Optimierung für mobile Geräte */
+/* Landscape optimization for mobile devices */
 @media (orientation: landscape) and (max-width: 1023px) {
   canvas {
     height: 100%;
@@ -740,38 +603,32 @@ canvas {
     max-height: 100vh;
     margin: 0 auto;
   }
-
   #mobile-buttons {
     bottom: 10px;
   }
-
   .mobile-btn-container {
     gap: 10px;
   }
-
   .mobile-btn {
     width: 50px;
     height: 50px;
   }
 }
 
-/* Desktop-Ansicht ab 1024px */
+/* Desktop view */
 @media only screen and (min-width: 1024px) {
   #mobile-buttons {
     display: none !important;
   }
-
   body {
     overflow: auto;
   }
-
   #content {
     height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-
   h1 {
     position: absolute;
     top: 20px;
@@ -779,7 +636,6 @@ canvas {
     width: 100%;
     text-align: center;
   }
-
   #game-container,
   #start-screen,
   #game-over,
@@ -795,7 +651,7 @@ canvas {
   }
 }
 
-/* Füge eine neue Klasse für den Vollbildmodus auf mobilen Geräten hinzu */
+/* Fullscreen mode for mobile devices */
 .game-running-mobile {
   overflow: hidden !important;
   position: fixed;
@@ -810,111 +666,5 @@ canvas {
   height: 100%;
   padding: 0;
   margin: 0;
-}
-
-.game-running-mobile #game-container {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.game-running-mobile canvas {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background-color: #000;
-}
-
-.game-running-mobile #footer {
-  display: none;
-}
-
-/* Verbesserte Darstellung für das Rotate-Device-Overlay */
-#rotate-device {
-  background-color: rgba(0, 0, 0, 0.95);
-  z-index: 2000;
-}
-
-#rotate-device h2 {
-  color: white;
-  font-family: "Luckiest Guy", cursive;
-  text-align: center;
-  margin-top: 20px;
-}
-
-/* Spezielle Anpassungen für die Impressum-Seite */
-body.impressum-page {
-  overflow: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  height: auto !important;
-  position: relative !important;
-  background-color: #000 !important;
-}
-
-.impressum-page #content {
-  height: auto !important;
-  min-height: 100vh !important;
-  overflow: visible !important;
-  padding-bottom: 50px !important;
-}
-
-/* iOS-spezifische Anpassungen */
-@supports (-webkit-touch-callout: none) {
-  .impressum-page {
-    /* iOS-spezifische Styles */
-    position: static !important;
-    overflow-y: auto !important;
-  }
-}
-
-/* Verbesserte Darstellung des Impressum-Links */
-.impressum-link {
-  display: inline-block;
-  color: #fff;
-  text-decoration: underline;
-  font-size: 14px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: "Luckiest Guy", cursive;
-  padding: 5px;
-  margin: 0;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.impressum-link:hover {
-  color: #ff9900;
-}
-
-/* Anpassungen für mobile Geräte */
-@media only screen and (max-width: 1023px) {
-  #footer {
-    position: absolute;
-    bottom: 5px;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    z-index: 100;
-  }
-
-  .impressum-link {
-    font-size: 12px;
-    padding: 5px 10px;
-    background: none;
-    border-radius: 0;
-    bottom: 5px;
-  }
 }
 

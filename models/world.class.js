@@ -22,16 +22,19 @@ class World {
   gameStateManager
   itemManager
 
+  /**
+   * Creates a new World instance.
+   * @param {HTMLCanvasElement} canvas - The canvas element.
+   * @param {Keyboard} keyboard - The keyboard input.
+   * @param {Level} level - The game level.
+   */
   constructor(canvas, keyboard, level) {
     this.ctx = canvas.getContext("2d")
     this.canvas = canvas
     this.keyboard = keyboard
-    this.level = level
+    this.level = level || { enemies: [], clouds: [], backgroundObjects: [], bottles: [], coins: [] }
     this.character.world = this
-    this.collisionManager = new CollisionManager(this)
-    this.renderer = new WorldRenderer(this)
-    this.gameStateManager = new GameStateManager(this)
-    this.itemManager = new ItemManager(this)
+    this.initializeManagers()
     this.setWorld()
     this.lastFrameTime = performance.now()
     this.renderer.draw()
@@ -39,18 +42,28 @@ class World {
   }
 
   /**
-   * Weist der Welt relevante Objekte zu.
-   * Setzt Referenzen zwischen Objekten, die sich kennen müssen.
+   * Initializes all managers.
    */
-  setWorld() {
-    this.level.enemies.forEach((enemy) => {
-      if (enemy instanceof Endboss) enemy.world = this
-    })
+  initializeManagers() {
+    this.collisionManager = new CollisionManager(this)
+    this.renderer = new WorldRenderer(this)
+    this.gameStateManager = new GameStateManager(this)
+    this.itemManager = new ItemManager(this)
   }
 
   /**
-   * Startet den wiederkehrenden Update-Loop.
-   * Aktualisiert regelmäßig den Spielzustand.
+   * Sets world references.
+   */
+  setWorld() {
+    if (this.level && this.level.enemies) {
+      this.level.enemies.forEach((enemy) => {
+        if (enemy instanceof Endboss) enemy.world = this
+      })
+    }
+  }
+
+  /**
+   * Starts the update loop.
    */
   run() {
     this.runInterval = setInterval(() => {
@@ -59,8 +72,7 @@ class World {
   }
 
   /**
-   * Aktualisiert den Spielzustand.
-   * Prüft Kollisionen, Gegenstände und Spielzustand.
+   * Updates the game state.
    */
   update() {
     this.collisionManager.checkCollisions()
@@ -70,8 +82,7 @@ class World {
   }
 
   /**
-   * Stoppt den Update-Loop.
-   * Wichtig beim Neustart oder Beenden des Spiels.
+   * Stops the update loop.
    */
   stop() {
     if (this.runInterval) {
@@ -80,3 +91,6 @@ class World {
     }
   }
 }
+
+window.World = World
+

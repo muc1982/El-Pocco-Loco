@@ -1,176 +1,140 @@
 class MoveableObject extends DrawableObject {
-  speed = 0.15
-  otherDirection = false
-  speedY = 0
-  speedX = 0
-  acceleration = 2.5
-  energy = 100
-  lastHit = 0
-  /**
- * Offsets für die Kollisionsgrenzen.
- * @type {{top: number, left: number, right: number, bottom: number}}
- */
-  offset = {
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  }
+  speed = 0.15;
+  otherDirection = false;
+  speedY = 0;
+  speedX = 0;
+  acceleration = 2.5;
+  energy = 100;
+  lastHit = 0;
+  offset = { top: 0, left: 0, right: 0, bottom: 0 };
+  groundY = 180;
 
   /**
-   * Y-Koordinate, an der der Boden liegt.
-   * @type {number}
-   */
-  groundY = 180
-
-  /**
-   * Wendet die Schwerkraft auf das Objekt an.
-   * Aktualisiert in regelmäßigen Abständen die vertikale Position (y) und Geschwindigkeit (speedY)
-   * und sorgt dafür, dass das Objekt den Boden nicht unterschreitet.
+   * Applies gravity to the object.
    */
   applyGravity() {
     setInterval(() => {
       if (this.isAboveGround() || this.speedY > 0) {
-        this.y -= this.speedY
-        this.speedY -= this.acceleration
-        this.limitGroundContact()
+        this.y -= this.speedY;
+        this.speedY -= this.acceleration;
+        this.limitGroundContact();
       }
-    }, 1000 / 25)
+    }, 1000 / 25);
   }
 
   /**
-   * Stellt sicher, dass das Objekt nicht unter den Boden fällt.
-   * Falls die y-Koordinate größer als groundY ist, wird sie korrigiert und speedY auf 0 gesetzt.
+   * Prevents the object from falling below ground.
    */
   limitGroundContact() {
     if (this.y > this.groundY) {
-      this.y = this.groundY
-      this.speedY = 0
+      this.y = this.groundY;
+      this.speedY = 0;
     }
   }
 
   /**
-   * Überprüft, ob das Objekt sich über dem Boden befindet.
-   * Falls das Objekt eine Instanz von ThrowableObject ist, wird immer true zurückgegeben.
-   *
-   * @returns {boolean} true, wenn das Objekt über dem Boden ist, sonst false.
+   * Checks if the object is above ground.
+   * @returns {boolean} True if above ground.
    */
   isAboveGround() {
-    if (this instanceof ThrowableObject) {
-      // Bei ThrowableObject immer true zurückgeben
-      return true
-    } else {
-      return this.y < this.groundY
-    }
+    if (this instanceof ThrowableObject) return true;
+    return this.y < this.groundY;
   }
 
   /**
-   * Prüft, ob dieses Objekt mit einem anderen Objekt kollidiert.
-   * Dabei werden die tatsächlichen Kollisionsgrenzen unter Berücksichtigung der Offsets berechnet.
-   *
-   * @param {Object} mo - Das zu prüfende Objekt mit Eigenschaften x, y, width, height und offset.
-   * @returns {boolean} true, wenn eine Kollision vorliegt, sonst false.
+   * Checks collision with another object.
+   * @param {Object} mo - The other object.
+   * @returns {boolean} True if colliding.
    */
   isColliding(mo) {
-    // Berechne die tatsächlichen Kollisionsgrenzen für dieses Objekt
-    const thisLeft = this.x + this.offset.left
-    const thisRight = this.x + this.width - this.offset.right
-    const thisTop = this.y + this.offset.top
-    const thisBottom = this.y + this.height - this.offset.bottom
+    const thisLeft = this.x + this.offset.left;
+    const thisRight = this.x + this.width - this.offset.right;
+    const thisTop = this.y + this.offset.top;
+    const thisBottom = this.y + this.height - this.offset.bottom;
 
-    // Berechne die tatsächlichen Kollisionsgrenzen für das andere Objekt
-    const moLeft = mo.x + mo.offset.left
-    const moRight = mo.x + mo.width - mo.offset.right
-    const moTop = mo.y + mo.offset.top
-    const moBottom = mo.y + mo.height - mo.offset.bottom
+    const moLeft = mo.x + mo.offset.left;
+    const moRight = mo.x + mo.width - mo.offset.right;
+    const moTop = mo.y + mo.offset.top;
+    const moBottom = mo.y + mo.height - mo.offset.bottom;
 
-    // Überprüfe, ob sich die Rechtecke überschneiden
-    return thisRight > moLeft && thisLeft < moRight && thisBottom > moTop && thisTop < moBottom
+    return thisRight > moLeft && thisLeft < moRight && thisBottom > moTop && thisTop < moBottom;
   }
 
   /**
-   * Überprüft, ob eine Kopfkollision mit einem anderen Objekt vorliegt.
-   * Eine Kopfkollision wird erkannt, wenn der untere Bereich des Objekts den Kopfbereich
-   * (etwa 40% der Höhe) des anderen Objekts berührt und das Objekt dabei nach oben fällt.
-   *
-   * @param {Object} mo - Das zu prüfende Objekt.
-   * @returns {boolean} true, wenn eine Kopfkollision erkannt wird, sonst false.
+   * Checks for a head collision.
+   * @param {Object} mo - The other object.
+   * @returns {boolean} True if head collision detected.
    */
   isCollidingWithHead(mo) {
-    const headRange = mo.height * 0.4
+    const headRange = mo.height * 0.4;
     return (
       this.isColliding(mo) &&
       this.y + this.height - this.offset.bottom < mo.y + mo.offset.top + headRange &&
       this.speedY < 0
-    )
+    );
   }
 
   /**
-   * Lässt das Objekt "springen" bzw. prallt es ab, indem die vertikale Geschwindigkeit (speedY) erhöht wird.
+   * Makes the object bounce.
    */
   bounce() {
-    this.speedY = 15
+    this.speedY = 15;
   }
 
   /**
-   * Verringert die Energie des Objekts bei einem Treffer.
-   * Aktualisiert auch den Zeitpunkt des letzten Treffers.
+   * Reduces the object's energy when hit.
    */
   hit() {
-    this.energy -= 10
-    this.energy = Math.max(0, this.energy)
-    this.lastHit = new Date().getTime()
+    this.energy -= 10;
+    this.energy = Math.max(0, this.energy);
+    this.lastHit = new Date().getTime();
   }
 
   /**
-   * Prüft, ob das Objekt kürzlich getroffen wurde (verletzt ist).
-   *
-   * @returns {boolean} true, wenn seit dem letzten Treffer weniger als 1 Sekunde vergangen ist.
+   * Checks if the object is hurt.
+   * @returns {boolean} True if hurt.
    */
   isHurt() {
-    const timePassed = (new Date().getTime() - this.lastHit) / 1000
-    return timePassed < 1
+    const timePassed = (new Date().getTime() - this.lastHit) / 1000;
+    return timePassed < 1;
   }
 
   /**
-   * Überprüft, ob das Objekt tot ist.
-   *
-   * @returns {boolean} true, wenn die Energie des Objekts 0 beträgt, sonst false.
+   * Checks if the object is dead.
+   * @returns {boolean} True if dead.
    */
   isDead() {
-    return this.energy === 0
+    return this.energy === 0;
   }
 
   /**
-   * Spielt eine Animationssequenz ab.
-   * Wählt anhand des aktuellen Bildindex das entsprechende Bild aus dem Image-Cache aus.
-   *
-   * @param {string[]} images - Array mit Bildpfaden für die Animation.
+   * Plays an animation sequence.
+   * @param {string[]} images - Array of image paths.
    */
   playAnimation(images) {
-    const i = this.currentImage % images.length
-    this.img = this.imageCache[images[i]]
-    this.currentImage++
+    const i = this.currentImage % images.length;
+    this.img = this.imageCache[images[i]];
+    this.currentImage++;
   }
 
   /**
-   * Bewegt das Objekt nach rechts entsprechend der aktuellen Geschwindigkeit.
+   * Moves the object to the right.
    */
   moveRight() {
-    this.x += this.speed
+    this.x += this.speed;
   }
 
   /**
-   * Bewegt das Objekt nach links entsprechend der aktuellen Geschwindigkeit.
+   * Moves the object to the left.
    */
   moveLeft() {
-    this.x -= this.speed
+    this.x -= this.speed;
   }
 
   /**
-   * Lässt das Objekt springen, indem die vertikale Geschwindigkeit (speedY) auf einen festen Wert gesetzt wird.
+   * Makes the object jump.
    */
   jump() {
-    this.speedY = 30
+    this.speedY = 30;
   }
 }
